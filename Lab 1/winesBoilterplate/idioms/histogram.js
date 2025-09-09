@@ -1,0 +1,1 @@
+function createHistogram(data, containerId) {}

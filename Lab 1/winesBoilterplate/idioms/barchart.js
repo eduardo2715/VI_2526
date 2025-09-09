@@ -1,0 +1,1 @@
+function createBarchart(data, containerId) {}
