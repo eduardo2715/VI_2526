@@ -30,6 +30,10 @@ for serie_item in os.listdir(data_folder):
     serie_name_match = re.search(r'name:\s*{[^}]*en:\s*"([^"]+)"', content)
     serie_name = serie_name_match.group(1) if serie_name_match else ""
 
+    # Extract series id
+    serie_id_match = re.search(r'id:\s*"([^"]+)"', content)
+    serie_id = serie_id_match.group(1) if serie_id_match else ""
+
     # -----------------------------
     # 2. Loop through all sets in this series
     # -----------------------------
@@ -49,6 +53,10 @@ for serie_item in os.listdir(data_folder):
         with open(set_file, "r", encoding="utf-8") as f:
             set_content = f.read()
 
+        # Extract set id
+        set_id_match = re.search(r'id:\s*"([^"]+)"', set_content)
+        set_id = set_id_match.group(1) if set_id_match else ""
+
         # Extract set name (English)
         set_name_match = re.search(r'name:\s*{[^}]*en:\s*"([^"]+)"', set_content)
         set_name = set_name_match.group(1) if set_name_match else ""
@@ -63,6 +71,8 @@ for serie_item in os.listdir(data_folder):
         for file in os.listdir(set_path):
             if not file.endswith(".ts") or not file[:-3].isdigit():
                 continue
+
+            internal_id = int(file[:-3])  # number from filename (e.g. 1.ts -> 1)
 
             file_path = os.path.join(set_path, file)
             with open(file_path, "r", encoding="utf-8") as f:
@@ -85,10 +95,13 @@ for serie_item in os.listdir(data_folder):
             tcgplayer = int(tcg_match.group(1)) if tcg_match else ""
 
             all_cards.append({
+                "internal_id": internal_id,   # 👈 new column
                 "name": name,
                 "rarity": rarity,
                 "tcgplayer": tcgplayer,
+                "serie_id": serie_id,
                 "serie_name": serie_name,
+                "set_id": set_id,
                 "set_name": set_name,
                 "release_date": release_date
             })
