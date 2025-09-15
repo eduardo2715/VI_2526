@@ -91,7 +91,8 @@ for serie_item in os.listdir(data_folder):
                 "serie_name": serie_name,
                 "set_id": set_id,
                 "set_name": set_name,
-                "release_date": release_date
+                "release_date": release_date,
+                "release_year": int(release_date[:4]) if release_date else None  # Derived year
             })
 
 # Save card metadata CSV
@@ -131,6 +132,7 @@ for _, card in cards_df.iterrows():
                 "set_name": card["set_name"],
                 "serie_name": card["serie_name"],
                 "release_date": card["release_date"],
+                "release_year": card["release_year"],  # Include derived year
                 "price_date": date,
                 "condition": condition,
                 "avg": values.get("avg"),
@@ -147,5 +149,5 @@ price_df.sort_values(by=["serie_id", "set_id", "internal_id", "price_date"], inp
 price_df_final = price_df.drop(columns=["internal_id", "set_id", "serie_id"])
 
 # Save final CSV
-price_df_final.to_csv("pokemon_cards_price_evolution_filtered_noID.csv", index=False)
+price_df_final.to_csv("pokemon_cards_price_evolution_filtered_withYear.csv", index=False)
 print(f"Price evolution CSV created! Total rows: {len(price_df_final)}")
