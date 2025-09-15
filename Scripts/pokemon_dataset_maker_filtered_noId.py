@@ -146,7 +146,7 @@ price_df = pd.DataFrame(price_rows)
 price_df.sort_values(by=["serie_id", "set_id", "internal_id", "price_date"], inplace=True)
 
 # Drop ID columns
-price_df_final = price_df.drop(columns=["internal_id", "set_id", "serie_id"])
+price_df_final = price_df.drop(columns=["internal_id", "set_id", "serie_id", "release_date"])
 
 # Save final CSV
 price_df_final.to_csv("pokemon_cards_price_evolution_filtered_withYear.csv", index=False)
