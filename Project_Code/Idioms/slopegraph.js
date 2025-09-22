@@ -143,8 +143,11 @@ function createSlopegraph(data, selector) {
       .attr("cy", v => y(v.avg))
       .attr("r",4)
       .attr("fill", color)
-      .style("opacity",1);
-
+      .style("opacity",1)
+      .append("title")  // simple browser tooltip
+      .text(v => 
+            `${v.name}\nSerie: ${v.serie}\nSet: ${v.set}\nType: ${v.type}\nAvg: ${v.avg.toFixed(2)}`
+        );
     localSlopeLines.push({ name:d.name, serie:d.serie, set:d.set, line, points:pts });
   });
 

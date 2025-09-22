@@ -82,29 +82,27 @@ function createScatterplot(data, selector) {
    .text("Total Revenue");
 
   scatterPoints = g.selectAll("circle")
-                   .data(aggregated)
-                   .enter()
-                   .append("circle")
-                   .attr("cx", d => x(d.count))
-                   .attr("cy", d => y(d.revenue))
-                   .attr("r", 6)
-                   .attr("fill", d => TYPE_COLORS[d.type] || "#888")
-                   // attach attributes for easier debugging / CSS selection if needed
-                   .attr("data-name", d => d.name)
-                   .attr("data-serie", d => d.serie)
-                   .attr("data-set", d => d.set)
-                   .on("click", function(event, d) {
-                     selectedCard =
-                       selectedCard &&
-                       selectedCard.name === d.name &&
-                       selectedCard.serie === d.serie &&
-                       selectedCard.set === d.set
-                         ? null
-                         : { name: d.name, serie: d.serie, set: d.set };
-                     updateSelectionAcrossPlots();
-                   })
-                   .append("title")
-                   .text(d =>
-                     `${d.name}\nSerie: ${d.serie}\nSet: ${d.set}\nType: ${d.type}\nCount: ${d.count}\nRevenue: ${d.revenue.toFixed(2)}\nPopularity Rank: ${d.rank}`
-                   );
+                  .data(aggregated)
+                  .enter()
+                  .append("circle")
+                  .attr("cx", d => x(d.count))
+                  .attr("cy", d => y(d.revenue))
+                  .attr("r", 6)
+                  .attr("fill", d => TYPE_COLORS[d.type] || "#888")
+                  .style("cursor", "pointer")
+                  .on("click", function(event, d) {
+                    selectedCard =
+                      selectedCard &&
+                      selectedCard.name === d.name &&
+                      selectedCard.serie === d.serie &&
+                      selectedCard.set === d.set
+                        ? null
+                        : { name: d.name, serie: d.serie, set: d.set };
+                    updateSelectionAcrossPlots();
+                  })
+                  .append("title")
+                  .text(d => 
+                    `${d.name}\nSerie: ${d.serie}\nSet: ${d.set}\nType: ${d.type}\nCount: ${d.count}\nRevenue: ${d.revenue.toFixed(2)}\nPopularity Rank: ${d.rank}`
+                  );
+
 }

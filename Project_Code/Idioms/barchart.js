@@ -80,6 +80,7 @@ function createBarchart(data, selector) {
     .attr("data-name", d => d.name)
     .attr("data-serie", d => d.serie)
     .attr("data-set", d => d.set)
+    .style("cursor", "pointer")
     .on("click", function(event, d) {
       selectedCard =
         selectedCard &&
