@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pokémon Scatter & Top 10 Sold</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <h2>Pokémon Scatter & Top 10 Sold</h2>
+
+  <div class="main-container">
+    <div class="filters">
+      <div class="filter-group">
+        <h4>Year <input type="checkbox" class="select-all" data-target="year-filters"> Select All</h4>
+        <div id="year-filters"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Serie <input type="checkbox" class="select-all" data-target="serie-filters"> Select All</h4>
+        <div id="serie-filters"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Set <input type="checkbox" class="select-all" data-target="set-filters"> Select All</h4>
+        <div id="set-filters"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Type <input type="checkbox" class="select-all" data-target="type-filters"> Select All</h4>
+        <div id="type-filters"></div>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="ScatterPlot"></div>
+      <div class="BarChart"></div>
+    </div>
+  </div>
+
+  <script src="Idioms/type_colors.js"></script>
+  <script src="Idioms/barchart.js"></script>
+  <script src="Idioms/scatterplot.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
