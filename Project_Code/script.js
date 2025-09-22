@@ -1,4 +1,4 @@
-const YEARS = [1999,2000,2003,2005,2006,2007,2004,2001,2002,2021,2020,2022,2023];
+const YEARS = [1999,2000,2001,2002,2003,2004,2005,2006,2007,2020,2021,2022,2023];
 const SERIES = ["Base","EX","Neo","Sword & Shield"];
 const SETS = [
   "Base Set","Jungle","Fossil","Base Set 2","Team Rocket","Ruby & Sapphire",
@@ -18,7 +18,8 @@ const TYPES = [
   "Psychic,Darkness","Fire,Darkness","Darkness,Darkness","Metal,Darkness","Dragon"
 ];
 
-// Create checkboxes for a filter
+let selectedName = null; // currently clicked Pokémon
+
 function createCheckboxes(containerId, items) {
   const container = d3.select(containerId);
   container.selectAll("*").remove();
@@ -27,32 +28,28 @@ function createCheckboxes(containerId, items) {
     label.append("input")
          .attr("type","checkbox")
          .attr("value", i)
-         .property("checked", false); // initially unchecked
+         .property("checked", false);
     label.append("span").text(i);
   });
 }
 
-// Get currently checked values of a filter
 function getCheckedValues(containerId) {
   return Array.from(d3.select(containerId).selectAll("input").nodes())
               .filter(d => d.checked)
               .map(d => d.value);
 }
 
-// Setup Select All behavior for all filters
 function setupSelectAllLogic() {
   d3.selectAll(".select-all").each(function() {
     const selectAllBox = d3.select(this);
     const targetId = selectAllBox.attr("data-target");
 
-    // Clicking "Select All" toggles all individual checkboxes
     selectAllBox.on("change", function() {
       const checked = this.checked;
       d3.select(`#${targetId}`).selectAll("input").property("checked", checked);
       updateCharts();
     });
 
-    // Sync "Select All" when individual checkboxes change
     d3.select(`#${targetId}`).selectAll("input").on("change", function() {
       const allChecked = d3.select(`#${targetId}`).selectAll("input").nodes()
                           .every(n => n.checked);
@@ -63,16 +60,15 @@ function setupSelectAllLogic() {
 }
 
 function init() {
-  // Create all filter checkboxes
   createCheckboxes("#year-filters", YEARS);
   createCheckboxes("#serie-filters", SERIES);
   createCheckboxes("#set-filters", SETS);
   createCheckboxes("#type-filters", TYPES);
 
-  // Load data and set up chart updating
+  setupSelectAllLogic();
+
   d3.csv("./data/dataset.csv").then(data => {
 
-    // Global function to update charts based on current filter selections
     window.updateCharts = function() {
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
@@ -83,19 +79,25 @@ function init() {
         (selectedYears.length === 0 || selectedYears.includes(+d.release_year)) &&
         (selectedSeries.length === 0 || selectedSeries.includes(d.serie_name)) &&
         (selectedSets.length === 0 || selectedSets.includes(d.set_name)) &&
-        (selectedTypes.length === 0 || selectedTypes.includes(d.types))
+        (selectedTypes.length === 0 || d.types.split(',').some(t => selectedTypes.includes(t)))
       );
 
       createScatterplot(filtered, ".ScatterPlot");
       createBarchart(filtered, ".BarChart");
     };
 
-    // Initialize Select All logic for filters
-    setupSelectAllLogic();
-
-    // Initial render
     updateCharts();
   });
+
+  // Click outside to unstick Pokémon
+  document.addEventListener("click", function(event) {
+  const isPokemonClick = event.target.closest("circle, .bar");
+  if (!isPokemonClick && selectedName) {
+    selectedName = null;
+    d3.selectAll("circle").transition().duration(300).style("opacity", 1);
+    d3.selectAll(".bar").transition().duration(300).style("opacity", 1);
+  }
+});
 }
 
 init();

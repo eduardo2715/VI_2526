@@ -7,10 +7,12 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-  <h2>Pokémon Scatter & Top 10 Sold</h2>
 
   <div class="main-container">
+    <!-- Filters on the left -->
     <div class="filters">
+      <h3 class="filters-header">Filters</h3>
+
       <div class="filter-group">
         <h4>Year <input type="checkbox" class="select-all" data-target="year-filters"> Select All</h4>
         <div id="year-filters"></div>
@@ -29,11 +31,18 @@
       </div>
     </div>
 
-    <div class="charts">
-      <div class="ScatterPlot"></div>
-      <div class="BarChart"></div>
+    <!-- Charts on the right -->
+    <div class="charts-section">
+      <h2>Pokémon Scatter & Top 10 Sold</h2>
+      <div class="charts">
+        <div class="ScatterPlot"></div>
+        <div class="BarChart"></div>
+      </div>
     </div>
   </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" style="position:absolute;pointer-events:none;background:white;padding:5px;border:1px solid #ccc;border-radius:4px;opacity:0;"></div>
 
   <script src="Idioms/type_colors.js"></script>
   <script src="Idioms/barchart.js"></script>

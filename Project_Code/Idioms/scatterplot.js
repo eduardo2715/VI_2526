@@ -68,19 +68,44 @@ function createScatterplot(data, selector) {
    .attr("text-anchor", "middle")
    .text("Total Revenue");
 
+  const tooltip = d3.select("#tooltip");
+
   scatterPoints = g.selectAll("circle")
-                   .data(aggregated)
-                   .enter()
-                   .append("circle")
-                   .attr("cx", d => x(d.count))
-                   .attr("cy", d => y(d.revenue))
-                   .attr("r", 6)
-                   .attr("fill", d => TYPE_COLORS[d.type] || "#888")
-                   .on("click", function(event, d) {
-                     d3.selectAll("circle").classed("highlight", false);
-                     d3.select(this).classed("highlight", true);
-                     d3.selectAll(".bar").classed("highlight", b => b.name === d.name);
-                   })
-                   .append("title")
-                   .text(d => `${d.name}\nType: ${d.type}\nCount: ${d.count}\nRevenue: ${d.revenue.toFixed(2)}`);
+    .data(aggregated)
+    .enter()
+    .append("circle")
+    .attr("cx", d => x(d.count))
+    .attr("cy", d => y(d.revenue))
+    .attr("r", 6)
+    .attr("fill", d => TYPE_COLORS[d.type] || "#888")
+    .style("opacity", 1)
+    .on("mouseover", function(event, d) {
+      if (selectedName) return;
+      scatterPoints.transition().duration(200)
+        .style("opacity", c => c.name === d.name ? 1 : 0.2);
+      d3.selectAll(".bar").transition().duration(200)
+        .style("opacity", b => b.name === d.name ? 1 : 0.2);
+      tooltip.style("opacity", 1)
+        .html(`${d.name}<br>Type: ${d.type}<br>Count: ${d.count}<br>Revenue: ${d.revenue.toFixed(2)}`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY + 10) + "px");
+    })
+    .on("mousemove", function(event) {
+      tooltip.style("left", (event.pageX + 10) + "px")
+             .style("top", (event.pageY + 10) + "px");
+    })
+    .on("mouseout", function() {
+      if (selectedName) return;
+      scatterPoints.transition().duration(200).style("opacity", 1);
+      d3.selectAll(".bar").transition().duration(200).style("opacity", 1);
+      tooltip.style("opacity", 0);
+    })
+    .on("click", function(event, d) {
+      selectedName = selectedName === d.name ? null : d.name;
+      scatterPoints.transition().duration(300)
+        .style("opacity", c => !selectedName || c.name === selectedName ? 1 : 0.2);
+      d3.selectAll(".bar").transition().duration(300)
+        .style("opacity", b => !selectedName || b.name === selectedName ? 1 : 0.2);
+      tooltip.style("opacity", 0); // hide tooltip on click
+    });
 }

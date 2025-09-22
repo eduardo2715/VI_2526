@@ -1,71 +1,98 @@
-body {
-  font-family: sans-serif;
-  background: #fafafa;
+/* --- General Reset --- */
+* {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
 }
 
-h2 {
-  text-align: center;
-  margin: 20px 0;
-}
-
+/* --- Main container --- */
 .main-container {
   display: flex;
-  height: calc(100vh - 80px);
+  height: 100vh;       /* full viewport height */
 }
 
+/* --- Filters panel --- */
 .filters {
-  width: 250px;
+  width: 300px;        /* adjust width as needed */
+  height: 100vh;       /* full viewport height */
   display: flex;
   flex-direction: column;
   padding: 10px;
-  overflow-y: auto;
+  background-color: #f8f8f8; /* optional panel background */
   border-right: 1px solid #ccc;
 }
 
+/* Main "Filters" header */
+.filters-header {
+  margin: 0;           /* remove default margin */
+  padding: 0;          /* remove default padding */
+  font-size: 1.2em;
+  font-weight: bold;
+  padding-bottom: 5px; /* small spacing before first group */
+}
+
+/* Each filter group (Year, Serie, Set, Type) */
 .filter-group {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 10px;
-  max-height: 25%;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 5px;
-}
-
-.filter-group h4 {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-.charts {
-  flex: 1;
+  flex: 1 1 0;         /* equal height for 4 groups */
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  margin-bottom: 5px;  /* spacing between groups */
+  min-height: 0;       /* allow inner scroll */
+}
+
+/* Group header (h4) with sticky behavior */
+.filter-group h4 {
+  position: sticky;
+  top: 0;              /* sticks to top of group */
+  background: #f8f8f8; /* match panel background */
+  z-index: 10;
+  padding: 5px 0;
+  border-bottom: 1px solid #ccc;
+  flex-shrink: 0;      /* prevent shrinking */
+  font-size: 1em;
+  font-weight: bold;
+}
+
+/* Scrollable checkbox list inside each group */
+.filter-group > div {
+  overflow-y: auto;    /* scroll if too many checkboxes */
+  flex: 1 1 auto;      /* take remaining height in group */
+  padding-left: 10px;  /* indent checkboxes */
+  min-height: 0;       /* required for flex scrolling */
+}
+
+/* --- Charts section --- */
+.charts-section {
+  flex: 1;             /* fill remaining width */
+  padding: 20px;
+  overflow: auto;      /* scroll if charts exceed height */
+}
+
+/* Charts layout */
+.charts {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;     /* allow wrapping on smaller screens */
+}
+
+/* ScatterPlot and BarChart containers */
+.ScatterPlot,
+.BarChart {
+  background: #fff;
+  border: 1px solid #ccc;
   padding: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.BarChart, .ScatterPlot {
-  flex: 1;
-  margin: 0 10px;
-}
-
-.bar {
-  transition: fill 0.2s;
-}
-
-.bar.highlight {
-  stroke: black;
-  stroke-width: 2px;
-}
-
-circle {
-  opacity: 0.7;
-  cursor: pointer;
-  transition: stroke 0.2s, opacity 0.2s;
-}
-
-circle.highlight {
-  stroke: black;
-  stroke-width: 2px;
-  opacity: 1;
+/* Tooltip styling */
+#tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: white;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  opacity: 0;
+  font-size: 0.9em;
 }

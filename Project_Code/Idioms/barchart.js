@@ -1,3 +1,5 @@
+let barRects = [];
+
 function createBarchart(data, selector) {
   d3.select(selector).selectAll("*").remove();
 
@@ -49,16 +51,48 @@ function createBarchart(data, selector) {
 
   g.append("g")
    .attr("transform", `translate(0,${innerHeight})`)
-   .call(d3.axisBottom(x).tickFormat(""));
+   .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s")));
 
-  g.selectAll(".bar")
-   .data(top10)
-   .enter()
-   .append("rect")
-   .attr("class", "bar")
-   .attr("y", d => y(d.name))
-   .attr("x", 0)
-   .attr("height", y.bandwidth())
-   .attr("width", d => x(d.count))
-   .attr("fill", d => TYPE_COLORS[d.type] || "#888");
+  const tooltip = d3.select("#tooltip");
+
+  barRects = g.selectAll(".bar")
+    .data(top10)
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("y", d => y(d.name))
+    .attr("x", 0)
+    .attr("height", y.bandwidth())
+    .attr("width", d => x(d.count))
+    .attr("fill", d => TYPE_COLORS[d.type] || "#888")
+    .style("opacity", 1)
+    .on("mouseover", function(event, d) {
+      if (selectedName) return;
+      barRects.transition().duration(200)
+        .style("opacity", b => b.name === d.name ? 1 : 0.2);
+      d3.selectAll("circle").transition().duration(200)
+        .style("opacity", c => c.name === d.name ? 1 : 0.2);
+      tooltip.style("opacity", 1)
+        .html(`${d.name}<br>Type: ${d.type}<br>Count: ${d.count}`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY + 10) + "px");
+    })
+    .on("mousemove", function(event) {
+      tooltip.style("left", (event.pageX + 10) + "px")
+             .style("top", (event.pageY + 10) + "px");
+    })
+    .on("mouseout", function() {
+      if (selectedName) return;
+      barRects.transition().duration(200).style("opacity", 1);
+      d3.selectAll("circle").transition().duration(200).style("opacity", 1);
+      tooltip.style("opacity", 0);
+    })
+    .on("click", function(event, d) {
+      selectedName = selectedName === d.name ? null : d.name;
+      barRects.transition().duration(300)
+        .style("opacity", b => !selectedName || b.name === selectedName ? 1 : 0.2);
+      d3.selectAll("circle").transition().duration(300)
+        .style("opacity", c => !selectedName || c.name === selectedName ? 1 : 0.2);
+      tooltip.style("opacity", 0);
+    });
 }
