@@ -116,10 +116,11 @@ function init(){
       d3.select(".ScatterPlot").selectAll("*").remove();
       d3.select(".BarChart").selectAll("*").remove();
       d3.select(".SlopeGraph").selectAll("*").remove();
+      d3.select(".BoxPlot").selectAll("*").remove();
 
       if(filtered.length===0){
         const noDataMsg="No data to display for the selected filters.";
-        [".ScatterPlot",".BarChart",".SlopeGraph"].forEach(sel=>{
+        [".ScatterPlot",".BarChart",".SlopeGraph",".BoxPlot"].forEach(sel=>{
           d3.select(sel).append("div").style("color","#666").style("font-size","1em")
             .style("padding","20px").style("text-align","center").text(noDataMsg);
         });
@@ -131,6 +132,7 @@ function init(){
       createScatterplot(filtered,".ScatterPlot");
       createBarchart(filtered,".BarChart");
       createSlopegraph(filtered,".SlopeGraph");
+      createBoxplot(filtered,".BoxPlot");
     };
 
     setupSelectAllLogic();
