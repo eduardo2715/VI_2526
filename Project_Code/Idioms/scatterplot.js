@@ -39,19 +39,24 @@ function createScatterplot(data, selector) {
   aggregated.sort((a, b) => d3.descending(a.count, b.count));
   aggregated.forEach((d, i) => { d.rank = i + 1; });
 
-  const width = 500,
-        height = 350,
-        margin = {top: 40, right: 20, bottom: 60, left: 80},
-        innerWidth = width - margin.left - margin.right,
-        innerHeight = height - margin.top - margin.bottom;
+  // --- Get container size dynamically ---
+  const container = document.querySelector(selector);
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const margin = { top: 40, right: 20, bottom: 60, left: 80 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
-                .attr("width", width)
-                .attr("height", height);
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio", "xMidYMid meet");
 
   const g = svg.append("g")
                .attr("transform", `translate(${margin.left},${margin.top})`);
 
+  // Scales
   const x = d3.scaleLinear()
               .domain([0, d3.max(aggregated, d => d.count) || 1])
               .nice()
@@ -62,9 +67,18 @@ function createScatterplot(data, selector) {
               .nice()
               .range([innerHeight, 0]);
 
-  g.append("g").attr("transform", `translate(0,${innerHeight})`).call(d3.axisBottom(x));
-  g.append("g").call(d3.axisLeft(y));
+  // Format Revenue as $10K, $2.5M
+  const formatRevenue = d3.format("$.2s");
 
+  // Axes
+  g.append("g")
+   .attr("transform", `translate(0,${innerHeight})`)
+   .call(d3.axisBottom(x));
+
+  g.append("g")
+   .call(d3.axisLeft(y).tickFormat(d => formatRevenue(d)));
+
+  // Axis labels
   g.append("text")
    .attr("x", innerWidth / 2)
    .attr("y", innerHeight + 40)
@@ -79,8 +93,9 @@ function createScatterplot(data, selector) {
    .attr("text-anchor", "middle")
    .attr("dominant-baseline", "middle")
    .style("font-size", "15px")
-   .text("Total Revenue");
+   .text("Total Revenue ($)");
 
+  // Draw points
   scatterPoints = g.selectAll("circle")
                   .data(aggregated)
                   .enter()
@@ -102,7 +117,6 @@ function createScatterplot(data, selector) {
                   })
                   .append("title")
                   .text(d => 
-                    `${d.name}\nSerie: ${d.serie}\nSet: ${d.set}\nType: ${d.type}\nCount: ${d.count}\nRevenue: ${d.revenue.toFixed(2)}\nPopularity Rank: ${d.rank}`
+                    `${d.name}\nSerie: ${d.serie}\nSet: ${d.set}\nType: ${d.type}\nCount: ${d.count}\nRevenue: ${formatRevenue(d.revenue)}\nPopularity Rank: ${d.rank}`
                   );
-
 }

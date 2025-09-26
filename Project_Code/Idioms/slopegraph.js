@@ -5,7 +5,6 @@ function createSlopegraph(data, selector) {
   window.slopeLines = [];
 
   const conditionOrder = ["mint","nearmint","excellent","good","lightplayed","played","poor"];
-
   function normalizeCondition(cond){
     if (!cond || typeof cond !== "string") return null;
     const parts = cond.split("-");
@@ -41,30 +40,31 @@ function createSlopegraph(data, selector) {
 
   if (aggregated.length === 0) return;
 
-  const width = 500,
-        height = 350,
-        margin = {top:40, right:40, bottom:60, left:80},
-        innerWidth = width - margin.left - margin.right,
-        innerHeight = height - margin.top - margin.bottom;
+  // --- Container size ---
+  const container = document.querySelector(selector);
+  const width = container.clientWidth; // leave space for slider
+  const height = container.clientHeight;
+  const margin = {top:40, right:20, bottom:60, left:80};
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .style("overflow","visible"); // allow tooltip
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("overflow","visible");
 
   const g = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // --- Clip path for plot area ---
+  // Clip path
   svg.append("defs").append("clipPath")
     .attr("id", "clip-slope")
     .append("rect")
     .attr("width", innerWidth)
-    .attr("height", innerHeight)
-    .attr("x", 0)
-    .attr("y", 0);
+    .attr("height", innerHeight);
 
-  // group with clipping for lines and dots
   const plotArea = g.append("g")
     .attr("class", "plot-area")
     .attr("clip-path", "url(#clip-slope)");
@@ -81,9 +81,8 @@ function createSlopegraph(data, selector) {
     .nice()
     .range([innerHeight, 0]);
 
-  // vertical grid UNDER everything
-  const gridGroup = plotArea.append("g").attr("class","grid");
-  gridGroup.selectAll(".x-line")
+  // Vertical grid
+  plotArea.selectAll(".x-line")
     .data(allConds)
     .enter().append("line")
     .attr("class","x-line")
@@ -93,7 +92,7 @@ function createSlopegraph(data, selector) {
     .attr("y2", innerHeight)
     .attr("stroke","#ccc");
 
-  // axes
+  // Axes
   const yAxis = g.append("g").attr("class","y-axis").call(d3.axisLeft(y));
   g.append("g").attr("class","x-axis")
     .attr("transform",`translate(0,${innerHeight})`)
@@ -165,7 +164,7 @@ function createSlopegraph(data, selector) {
 
   window.slopeLines = localSlopeLines;
 
-  // --- Tooltips ---
+  // Tooltips
   function updateSlopeTooltips() {
     d3.selectAll("circle.slope-dot").each(function(d){
       d3.select(this).select("title").remove();
@@ -179,7 +178,6 @@ function createSlopegraph(data, selector) {
   }
   updateSlopeTooltips();
 
-  // --- Raise selected line + dots ---
   function raiseSelectedElements() {
     if (!selectedCard) return;
     d3.selectAll(".slope-line")
@@ -198,29 +196,15 @@ function createSlopegraph(data, selector) {
       .raise();
   }
 
-  // --- Zoom slider below chart ---
-  const zoomSliderDiv = d3.select(selector).append("div")
-    .style("margin-top","10px")
-    .style("display","flex")
-    .style("flex-direction","column")
-    .style("align-items","center");
-
-  const zoomSlider = zoomSliderDiv.append("input")
-    .attr("type","range")
-    .attr("min",0)
-    .attr("max",2)
-    .attr("step",0.01)
-    .attr("value",0)
-    .classed("slider", true)
-    .style("width","100%");
-
-  zoomSliderDiv.append("span").text("Zoom");
+  // --- Use existing slider from HTML ---
+  const zoomSlider = d3.select("#slopeZoom");
 
   const targetFraction = 0.1;
   let panValue = 0;
 
   function updateYAxis(){
-    const logValue = +zoomSlider.property("value");
+    // Invert slider: up = zoom in
+    const logValue = 2 - (+zoomSlider.property("value"));
     const linearFactor = Math.pow(10, logValue);
     const adaptiveFactor = 1 + (linearFactor - 1) * (maxY / (maxY * targetFraction));
     const visibleMax = maxY / adaptiveFactor;
@@ -229,7 +213,6 @@ function createSlopegraph(data, selector) {
     const yMax = yMin + visibleMax;
 
     y.domain([yMin, yMax]).nice();
-
     yAxis.transition().duration(100).call(d3.axisLeft(y));
 
     window.slopeLines.forEach(s => {

@@ -31,22 +31,26 @@ function createBarchart(data, selector) {
   });
 
   let top10 = aggregated.sort((a, b) => d3.descending(a.count, b.count)).slice(0, 10);
-
   if (top10.length === 0) return;
 
-  const width = 500,
-        height = 350,
-        margin = {top: 40, right: 20, bottom: 20, left: 140},
-        innerWidth = width - margin.left - margin.right,
-        innerHeight = height - margin.top - margin.bottom;
+  // --- Get container size dynamically ---
+  const container = document.querySelector(selector);
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const margin = { top: 40, right: 20, bottom: 20, left: 140 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
-                .attr("width", width)
-                .attr("height", height);
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio", "xMidYMid meet");
 
   const g = svg.append("g")
                .attr("transform", `translate(${margin.left},${margin.top})`);
 
+  // Scales
   const y = d3.scaleBand()
               .domain(top10.map(d => `${d.name}---${d.serie}---${d.set}`))
               .range([0, innerHeight])
@@ -56,17 +60,20 @@ function createBarchart(data, selector) {
               .domain([0, d3.max(top10, d => d.count)])
               .range([0, innerWidth]);
 
+  // Axes
   g.append("g")
-    .call(d3.axisLeft(y).tickFormat(t => t.split('---')[0]))
-    .selectAll("text")
-    .style("font-size", "14px");
+   .call(d3.axisLeft(y).tickFormat(t => t.split('---')[0]))
+   .selectAll("text")
+   .style("font-size", "14px");
 
   g.append("g")
    .attr("transform", `translate(0,${innerHeight})`)
    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s")));
 
+  // Tooltip
   const tooltip = d3.select("#tooltip");
 
+  // Bars
   barRects = g.selectAll(".bar")
     .data(top10)
     .enter()

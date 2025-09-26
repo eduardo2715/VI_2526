@@ -2,7 +2,7 @@
 html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* no page-level scrolling */
+  overflow: hidden;
 }
 
 * {
@@ -21,7 +21,9 @@ html, body {
 
 /* --- Filters panel --- */
 .filters {
-  width: 300px;
+  width: 220px;
+  min-width: 160px;
+  max-width: 18%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -30,72 +32,157 @@ html, body {
   border-right: 1px solid #ccc;
 }
 
-.title {
-  margin-bottom: 1rem;
-}
-/* Main "Filters" header */
 .filters-header {
-  margin: 0;           /* remove default margin */
-  padding: 0;          /* remove default padding */
   font-size: 1.2em;
   font-weight: bold;
-  padding-bottom: 5px; /* small spacing before first group */
+  margin-bottom: 10px;
 }
 
-/* Each filter group (Year, Serie, Set, Type) */
 .filter-group {
-  flex: 1 1 0;         /* equal height for 4 groups */
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: 5px;  /* spacing between groups */
-  min-height: 0;       /* allow inner scroll */
+  margin-bottom: 5px;
+  min-height: 0;
 }
 
-/* Group header (h4) with sticky behavior */
 .filter-group h4 {
   position: sticky;
-  top: 0;              /* sticks to top of group */
-  background: #f8f8f8; /* match panel background */
+  top: 0;
+  background: #f8f8f8;
   z-index: 10;
   padding: 5px 0;
   border-bottom: 1px solid #ccc;
-  flex-shrink: 0;      /* prevent shrinking */
   font-size: 1em;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
-/* Scrollable checkbox list inside each group */
 .filter-group > div {
-  overflow-y: auto;    /* scroll if too many checkboxes */
-  flex: 1 1 auto;      /* take remaining height in group */
-  padding-left: 10px;  /* indent checkboxes */
-  min-height: 0;       /* required for flex scrolling */
+  overflow-y: auto;
+  flex: 1 1 auto;
+  padding-left: 10px;
+  min-height: 0;
+}
+
+.filter-group > div::-webkit-scrollbar {
+  width: 6px;
+}
+.filter-group > div::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
 }
 
 /* --- Charts section --- */
 .charts-section {
   flex: 1;
   padding: 20px;
-  overflow: auto; /* scroll inside this pane if needed */
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
+
+.title {
+  margin-bottom: 0.5rem;
+}
+
+/* Charts grid */
+.charts {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
   height: 100%;
 }
 
-/* Charts layout */
-.charts {
-  display: flex;
+/* Top row */
+.top-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
   gap: 20px;
-  flex-wrap: wrap;     /* allow wrapping on smaller screens */
 }
 
-/* ScatterPlot and BarChart containers */
+/* Bottom row */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Chart containers */
 .ScatterPlot,
 .BarChart,
-.SlopeGraph,
 .BoxPlot {
   background: #fff;
   border: 1px solid #ccc;
   padding: 10px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- SlopeGraph with vertical slider --- */
+.SlopeGraph-container {
+  display: flex;
+  flex-direction: row;   /* slopegraph + slider side by side */
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 0;  /* remove extra padding so chart can expand fully */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.SlopeGraph {
+  flex: 1;         /* take all remaining width */
+  height: 100%;    /* full height of container */
+  min-width: 0;    /* allow shrinking properly in flexbox */
+}
+
+/* Only move the "Zoom" text inside the label */
+.slider-label {
+  display: flex;
+  flex-direction: column-reverse; /* puts text above slider */
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8em;
+  margin: 5px;
+  width: 20px;
+  gap: 6px;
+}
+
+.slider-label span {
+  margin-bottom: 10px; /* push text up a bit more */
+}
+
+/* Rotate slider vertical + make thinner */
+.SlopeGraph-container .slider {
+  transform: rotate(90deg);
+  width: 180px;   /* vertical length */
+  height: 12px;   /* thickness (thinner now) */
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ddd;
+  border-radius: 5px;
+}
+
+/* Thinner thumb */
+.SlopeGraph-container .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #666;
+  cursor: pointer;
+  border: none;
+}
+.SlopeGraph-container .slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #666;
+  cursor: pointer;
+  border: none;
 }
 
 /* Tooltip styling */
@@ -109,33 +196,3 @@ html, body {
   opacity: 0;
   font-size: 0.9em;
 }
-
-
-.SlopeGraph .slider {
-  -webkit-appearance: none;
-  appearance: none;
-  background: #ddd;
-  height: 8px; /* track thickness for horizontal */
-  border-radius: 5px;
-}
-
-.SlopeGraph .slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #888;
-  cursor: pointer;
-  border: none;
-}
-
-.SlopeGraph .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #888;
-  cursor: pointer;
-  border: none;
-}
-
