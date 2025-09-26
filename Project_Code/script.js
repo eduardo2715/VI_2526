@@ -111,17 +111,17 @@ function init(){
   createCheckboxes("#type-filters",TYPES);
 
   d3.csv("./data/short_dataset_prices_fixed.csv").then(data=>{
-    window.updateCharts=function(){
-      const selectedYears=getCheckedValues("#year-filters").map(Number);
-      const selectedSeries=getCheckedValues("#serie-filters");
-      const selectedSets=getCheckedValues("#set-filters");
-      const selectedTypes=getCheckedValues("#type-filters");
+    window.updateCharts = function() {
+      const selectedYears = getCheckedValues("#year-filters").map(Number);
+      const selectedSeries = getCheckedValues("#serie-filters");
+      const selectedSets = getCheckedValues("#set-filters");
+      const selectedTypes = getCheckedValues("#type-filters");
 
-      const filtered=data.filter(d=>
-        (selectedYears.length===0 || selectedYears.includes(+d.release_year)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie_name)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set_name)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.types))
+      const filtered = data.filter(d =>
+        (selectedYears.length === 0 || selectedYears.includes(+d.release_year)) &&
+        (selectedSeries.length === 0 || selectedSeries.includes(d.serie_name)) &&
+        (selectedSets.length === 0 || selectedSets.includes(d.set_name)) &&
+        (selectedTypes.length === 0 || selectedTypes.includes(d.types))
       );
 
       d3.select(".ScatterPlot").selectAll("*").remove();
@@ -129,21 +129,37 @@ function init(){
       d3.select(".SlopeGraph").selectAll("*").remove();
       d3.select(".BoxPlot").selectAll("*").remove();
 
-      if(filtered.length===0){
-        const noDataMsg="No data to display for the selected filters.";
-        [".ScatterPlot",".BarChart",".SlopeGraph",".BoxPlot"].forEach(sel=>{
-          d3.select(sel).append("div").style("color","#666").style("font-size","1em")
-            .style("padding","20px").style("text-align","center").text(noDataMsg);
+      const sliderWrapper = document.querySelector(".slider-wrapper");
+
+      if (filtered.length === 0) {
+        const noDataMsg = "No data to display for the selected filters.";
+        [".ScatterPlot", ".BarChart", ".SlopeGraph", ".BoxPlot"].forEach(sel => {
+          d3.select(sel).append("div")
+            .style("display", "flex")               // use flex
+            .style("align-items", "center")         // vertical centering
+            .style("justify-content", "center")     // horizontal centering
+            .style("height", "100%")                // fill container
+            .style("width", "100%")                 // optional
+            .style("color", "#666")
+            .style("font-size", "1em")
+            .text(noDataMsg);
         });
-        // ensure slopeLines cleared
         window.slopeLines = [];
+
+        // hide slider and buttons
+        const sliderWrapper = document.querySelector(".slider-wrapper");
+        if (sliderWrapper) sliderWrapper.style.display = "none";
+
         return;
       }
 
-      createScatterplot(filtered,".ScatterPlot");
-      createBarchart(filtered,".BarChart");
-      createSlopegraph(filtered,".SlopeGraph");
-      createBoxplot(filtered,".BoxPlot");
+      // show slider and buttons
+      if (sliderWrapper) sliderWrapper.style.display = "flex";
+
+      createScatterplot(filtered, ".ScatterPlot");
+      createBarchart(filtered, ".BarChart");
+      createSlopegraph(filtered, ".SlopeGraph");
+      createBoxplot(filtered, ".BoxPlot");
     };
 
     setupSelectAllLogic();
