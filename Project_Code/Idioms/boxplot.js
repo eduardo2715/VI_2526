@@ -9,15 +9,13 @@ function createBoxplot(data, selector) {
     "Holo Rare VSTAR","Radiant Rare","Amazing Rare","Ultra Rare","Secret Rare"
   ];
 
-  // --- Aggregate data by Pokémon (name + serie + set) AND rarity ---
   const grouped = d3.rollup(
     data,
-    rows => d3.mean(rows, r => +r.avg), // Pokémon average price in this rarity
+    rows => d3.mean(rows, r => +r.avg),
     d => d.rarity,
     d => `${d.name}|${d.serie_name}|${d.set_name}`
   );
 
-  // Transform grouped data into stats per rarity
   let stats = [];
   grouped.forEach((byPokemon, rarity) => {
     if (!rarityOrder.includes(rarity)) return;
@@ -37,11 +35,13 @@ function createBoxplot(data, selector) {
 
   if (stats.length === 0) return;
 
-  const width = 500,
-        height = 350,
-        margin = {top:40, right:40, bottom:80, left:80},
-        innerWidth = width - margin.left - margin.right,
-        innerHeight = height - margin.top - margin.bottom;
+  // --- Responsive container size ---
+  const container = document.querySelector(selector);
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const margin = { top: 40, right: 40, bottom: 80, left: 80 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
     .attr("width", width)
@@ -71,16 +71,16 @@ function createBoxplot(data, selector) {
   g.append("g").call(d3.axisLeft(y));
 
   g.append("text")
-    .attr("x", innerWidth/2)
-    .attr("y", innerHeight+60)
-    .attr("text-anchor","middle")
+    .attr("x", innerWidth / 2)
+    .attr("y", innerHeight + 60)
+    .attr("text-anchor", "middle")
     .text("Rarity");
 
   g.append("text")
-    .attr("transform","rotate(-90)")
-    .attr("x", -innerHeight/2)
-    .attr("y", -margin.left+20)
-    .attr("text-anchor","middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -innerHeight / 2)
+    .attr("y", -margin.left + 20)
+    .attr("text-anchor", "middle")
     .text("Average Pokémon Price");
 
   // draw boxplots
@@ -89,23 +89,23 @@ function createBoxplot(data, selector) {
 
     // whiskers
     g.append("line")
-      .attr("x1", cx + x.bandwidth()/2)
-      .attr("x2", cx + x.bandwidth()/2)
+      .attr("x1", cx + x.bandwidth() / 2)
+      .attr("x2", cx + x.bandwidth() / 2)
       .attr("y1", y(d.lower))
       .attr("y2", y(d.upper))
       .attr("stroke", "black");
 
     // min & max caps
     g.append("line")
-      .attr("x1", cx + x.bandwidth()/4)
-      .attr("x2", cx + 3*x.bandwidth()/4)
+      .attr("x1", cx + x.bandwidth() / 4)
+      .attr("x2", cx + 3 * x.bandwidth() / 4)
       .attr("y1", y(d.lower))
       .attr("y2", y(d.lower))
       .attr("stroke", "black");
 
     g.append("line")
-      .attr("x1", cx + x.bandwidth()/4)
-      .attr("x2", cx + 3*x.bandwidth()/4)
+      .attr("x1", cx + x.bandwidth() / 4)
+      .attr("x2", cx + 3 * x.bandwidth() / 4)
       .attr("y1", y(d.upper))
       .attr("y2", y(d.upper))
       .attr("stroke", "black");

@@ -76,11 +76,11 @@ html, body {
 /* --- Charts section --- */
 .charts-section {
   flex: 1;
-  padding: 20px;
-  height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr; /* title + charts */
   gap: 10px;
+  height: 100%;
+  padding: 20px;
 }
 
 .title {
@@ -90,9 +90,10 @@ html, body {
 /* Charts grid */
 .charts {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr 1fr; /* top + bottom rows */
   gap: 20px;
   height: 100%;
+  min-height: 0;
 }
 
 /* Top row */
@@ -100,6 +101,7 @@ html, body {
   display: grid;
   grid-template-columns: 3fr 1fr;
   gap: 20px;
+  min-height: 0;
 }
 
 /* Bottom row */
@@ -107,12 +109,14 @@ html, body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  min-height: 0;
 }
 
 /* Chart containers */
 .ScatterPlot,
 .BarChart,
-.BoxPlot {
+.BoxPlot,
+.SlopeGraph-container {
   background: #fff;
   border: 1px solid #ccc;
   padding: 10px;
@@ -120,46 +124,48 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  min-height: 0; /* crucial for flex/grid shrinking */
 }
 
 /* --- SlopeGraph with vertical slider --- */
 .SlopeGraph-container {
   display: flex;
-  flex-direction: row;   /* slopegraph + slider side by side */
-  background: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  flex-direction: row; /* slopegraph + slider */
   height: 100%;
+  min-height: 0;
 }
 
 .SlopeGraph {
-  flex: 1;         /* take all remaining width */
-  height: 100%;    /* full height of container */
-  min-width: 0;    /* allow shrinking properly in flexbox */
+  flex: 1;
+  height: 100%;
+  min-width: 0;
 }
 
-/* Slider + buttons */
+/* Slider + buttons wrapper */
 .slider-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   width: 40px;
+  height: 100%;  /* take full container height */
   margin-left: 5px;
-  padding: 100px 0;
+  padding: 80px 0;
 }
 
+/* Slider buttons */
 .slider-btn {
   width: 30px;
   height: 30px;
-  margin: 2px 0;
   border: 1px solid #ccc;
   background: #eee;
   cursor: pointer;
   font-size: 1em;
-  border-radius: 5px;
+  border-radius: 20px;
 }
 
+/* Vertical slider */
 .SlopeGraph-container .slider {
   transform: rotate(-90deg);
   width: 180px;   /* vertical length */
@@ -169,7 +175,7 @@ html, body {
   appearance: none;
   background: #ddd;
   border-radius: 5px;
-  margin: 5px 0;
+  margin: 0; 
 }
 
 /* Tooltip styling */
