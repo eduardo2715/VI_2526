@@ -34,8 +34,8 @@ function createBarchart(data, selector) {
 
   if (top10.length === 0) return;
 
-  const width = 400,
-        height = 500,
+  const width = 500,
+        height = 350,
         margin = {top: 40, right: 20, bottom: 20, left: 140},
         innerWidth = width - margin.left - margin.right,
         innerHeight = height - margin.top - margin.bottom;

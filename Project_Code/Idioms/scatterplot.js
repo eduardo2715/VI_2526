@@ -40,7 +40,7 @@ function createScatterplot(data, selector) {
   aggregated.forEach((d, i) => { d.rank = i + 1; });
 
   const width = 500,
-        height = 500,
+        height = 350,
         margin = {top: 40, right: 20, bottom: 60, left: 80},
         innerWidth = width - margin.left - margin.right,
         innerHeight = height - margin.top - margin.bottom;

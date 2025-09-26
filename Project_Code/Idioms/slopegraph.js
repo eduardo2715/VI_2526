@@ -41,7 +41,8 @@ function createSlopegraph(data, selector) {
 
   if (aggregated.length === 0) return;
 
-  const width = 600, height = 500,
+  const width = 500,
+        height = 350,
         margin = {top:40, right:40, bottom:60, left:80},
         innerWidth = width - margin.left - margin.right,
         innerHeight = height - margin.top - margin.bottom;
