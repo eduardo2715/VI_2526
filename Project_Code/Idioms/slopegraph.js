@@ -226,7 +226,7 @@ function createSlopegraph(data, selector) {
 
   svg.on("wheel", (event) => {
     event.preventDefault();
-    const delta = event.deltaY / 500000;
+    const delta = event.deltaY / 50000;
     panValue = Math.max(0, Math.min(1, panValue - delta));
     updateYAxis();
   });

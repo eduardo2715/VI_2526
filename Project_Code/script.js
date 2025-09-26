@@ -55,15 +55,22 @@ function setupSelectAllLogic(){
 }
 
 function updateSelectionAcrossPlots() {
-  // Scatterplot circles (use data bound to circles)
-  d3.selectAll(".ScatterPlot circle").transition().duration(300)
-    .style("opacity", c =>
+  // Scatterplot circles
+  d3.selectAll(".ScatterPlot circle").each(function(c) {
+    const highlight =
       !selectedCard ||
       (c.name === selectedCard.name &&
        c.serie === selectedCard.serie &&
-       c.set === selectedCard.set) ? 1 : 0.1    );
+       c.set === selectedCard.set);
 
-  // Barchart rects (data bound to bars)
+    d3.select(this)
+      .transition().duration(300)
+      .style("opacity", highlight ? 1 : 0.1);
+
+    if (highlight) d3.select(this).raise(); // <-- raise selected circle
+  });
+
+  // Barchart rects
   d3.selectAll(".BarChart .bar").transition().duration(300)
     .style("opacity", b =>
       !selectedCard ||
@@ -72,7 +79,7 @@ function updateSelectionAcrossPlots() {
        b.set === selectedCard.set) ? 1 : 0.1
     );
 
-  // Slopegraph (use the global window.slopeLines array)
+  // Slopegraph
   if (window.slopeLines && Array.isArray(window.slopeLines)) {
     window.slopeLines.forEach(d => {
       const highlight =
@@ -81,13 +88,18 @@ function updateSelectionAcrossPlots() {
          d.serie === selectedCard.serie &&
          d.set === selectedCard.set);
 
-      // line & points toggled together
+      // lines & points
       d.line.transition().duration(300)
         .style("opacity", highlight ? 1 : 0.1)
         .attr("stroke-width", highlight ? 3 : 2);
 
       d.points.transition().duration(300)
         .style("opacity", highlight ? 1 : 0.1);
+
+      if (highlight) {
+        d.line.raise();   // raise the line
+        d.points.raise(); // raise the dots
+      }
     });
   }
 }
