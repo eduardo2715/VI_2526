@@ -128,8 +128,8 @@ html, body {
   flex-direction: row;   /* slopegraph + slider side by side */
   background: #fff;
   border: 1px solid #ccc;
-  padding: 0;  /* remove extra padding so chart can expand fully */
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: 100%;
 }
 
 .SlopeGraph {
@@ -138,54 +138,38 @@ html, body {
   min-width: 0;    /* allow shrinking properly in flexbox */
 }
 
-.slider-label {
-  position: relative;       /* container for absolute positioning */
+/* Slider + buttons */
+.slider-wrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 40px;              /* same as before */
-  height: auto;
+  justify-content: space-between;
+  width: 40px;
+  margin-left: 5px;
+  padding: 100px 0;
 }
 
-.slider-label .slider-text {
-  position: absolute;
-  bottom: calc(100% - 100px);  /* 10px above slider */
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8em;
-  white-space: nowrap;
-  pointer-events: none;
+.slider-btn {
+  width: 30px;
+  height: 30px;
+  margin: 2px 0;
+  border: 1px solid #ccc;
+  background: #eee;
+  cursor: pointer;
+  font-size: 1em;
+  border-radius: 5px;
 }
 
-/* Rotate slider vertical + make thinner */
 .SlopeGraph-container .slider {
   transform: rotate(-90deg);
   width: 180px;   /* vertical length */
-  height: 12px;   /* thickness (thinner now) */
+  height: 12px;   /* thickness */
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
   background: #ddd;
   border-radius: 5px;
-}
-
-/* Thinner thumb */
-.SlopeGraph-container .slider::-webkit-slider-thumb { /*does nothing*/
-  -webkit-appearance: none;
-  width: 12px;   /*does nothing*/
-  height: 100px;  /*does nothing*/
-  border-radius: 100%; /*does nothing*/
-  background: #dd0a0a; /*does nothing*/
-  cursor: pointer; /*does nothing*/
-  border: none; /*does nothing*/
-}
-.SlopeGraph-container .slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #666;
-  cursor: pointer;
-  border: none;
+  margin: 5px 0;
 }
 
 /* Tooltip styling */

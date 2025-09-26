@@ -47,13 +47,15 @@
           <!-- SlopeGraph with vertical slider -->
           <div class="SlopeGraph-container">
             <div class="SlopeGraph"></div>
-            <label class="slider-label">
-              <input type="range" min="0" max="2" step="0.01" value="0"
-                    class="slider" id="slopeZoom">
-              <span class="slider-text">Zoom</span>
-            </label>
 
+            <div class="slider-wrapper">
+              <button class="slider-btn plus">+</button>
+              <input type="range" min="0" max="2" step="0.03" value="0"
+                    class="slider" id="slopeZoom">
+              <button class="slider-btn minus">-</button>
+            </div>
           </div>
+
           <!-- BoxPlot -->
           <div class="BoxPlot"></div>
         </div>

@@ -153,7 +153,7 @@ function init(){
 
 document.addEventListener("click", function(event){
   const isPokemonClick = event.target.closest("circle, .bar, .slope-line");
-  const isSliderClick = event.target.closest("input[type=range], .slider");
+  const isSliderClick = event.target.closest("input[type=range], .slider, .slider-btn");
   
   if(!isPokemonClick && !isSliderClick && selectedCard){
     selectedCard = null;

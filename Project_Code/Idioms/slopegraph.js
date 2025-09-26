@@ -224,6 +224,21 @@ function createSlopegraph(data, selector) {
 
   zoomSlider.on("input", updateYAxis);
 
+  // Buttons functionality
+  d3.select(".slider-btn.plus").on("click", () => {
+    let val = +zoomSlider.property("value");
+    val = Math.min(+zoomSlider.attr("max"), val + +zoomSlider.attr("step"));
+    zoomSlider.property("value", val);
+    updateYAxis();
+  });
+
+  d3.select(".slider-btn.minus").on("click", () => {
+    let val = +zoomSlider.property("value");
+    val = Math.max(+zoomSlider.attr("min"), val - +zoomSlider.attr("step"));
+    zoomSlider.property("value", val);
+    updateYAxis();
+  });
+
   svg.on("wheel", (event) => {
     event.preventDefault();
     const delta = event.deltaY / 50000;
