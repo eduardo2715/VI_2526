@@ -138,25 +138,28 @@ html, body {
   min-width: 0;    /* allow shrinking properly in flexbox */
 }
 
-/* Only move the "Zoom" text inside the label */
 .slider-label {
+  position: relative;       /* container for absolute positioning */
   display: flex;
-  flex-direction: column-reverse; /* puts text above slider */
   align-items: center;
   justify-content: center;
-  font-size: 0.8em;
-  margin: 5px;
-  width: 20px;
-  gap: 6px;
+  width: 40px;              /* same as before */
+  height: auto;
 }
 
-.slider-label span {
-  margin-bottom: 10px; /* push text up a bit more */
+.slider-label .slider-text {
+  position: absolute;
+  bottom: calc(100% - 100px);  /* 10px above slider */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8em;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* Rotate slider vertical + make thinner */
 .SlopeGraph-container .slider {
-  transform: rotate(90deg);
+  transform: rotate(-90deg);
   width: 180px;   /* vertical length */
   height: 12px;   /* thickness (thinner now) */
   cursor: pointer;
@@ -167,14 +170,14 @@ html, body {
 }
 
 /* Thinner thumb */
-.SlopeGraph-container .slider::-webkit-slider-thumb {
+.SlopeGraph-container .slider::-webkit-slider-thumb { /*does nothing*/
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #666;
-  cursor: pointer;
-  border: none;
+  width: 12px;   /*does nothing*/
+  height: 100px;  /*does nothing*/
+  border-radius: 100%; /*does nothing*/
+  background: #dd0a0a; /*does nothing*/
+  cursor: pointer; /*does nothing*/
+  border: none; /*does nothing*/
 }
 .SlopeGraph-container .slider::-moz-range-thumb {
   width: 12px;

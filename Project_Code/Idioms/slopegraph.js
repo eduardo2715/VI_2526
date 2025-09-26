@@ -202,31 +202,31 @@ function createSlopegraph(data, selector) {
   const targetFraction = 0.1;
   let panValue = 0;
 
-  function updateYAxis(){
-    // Invert slider: up = zoom in
-    const logValue = 2 - (+zoomSlider.property("value"));
-    const linearFactor = Math.pow(10, logValue);
-    const adaptiveFactor = 1 + (linearFactor - 1) * (maxY / (maxY * targetFraction));
-    const visibleMax = maxY / adaptiveFactor;
+  function updateYAxis() {
+      // Reverse the slider logic
+      const logValue = +zoomSlider.property("value");  // remove the "2 - ..." part
+      const linearFactor = Math.pow(10, logValue);
+      const adaptiveFactor = 1 + (linearFactor - 1) * (maxY / (maxY * targetFraction));
+      const visibleMax = maxY / adaptiveFactor;
 
-    const yMin = panValue * (maxY - visibleMax);
-    const yMax = yMin + visibleMax;
+      const yMin = panValue * (maxY - visibleMax);
+      const yMax = yMin + visibleMax;
 
-    y.domain([yMin, yMax]).nice();
-    yAxis.transition().duration(100).call(d3.axisLeft(y));
+      y.domain([yMin, yMax]).nice();
+      yAxis.transition().duration(100).call(d3.axisLeft(y));
 
-    window.slopeLines.forEach(s => {
-      s.line.transition().duration(100).attr("d", lineGen);
-      s.points.transition().duration(100)
-        .attr("cy", d => y(d.avg));
-    });
+      window.slopeLines.forEach(s => {
+          s.line.transition().duration(100).attr("d", lineGen);
+          s.points.transition().duration(100)
+              .attr("cy", d => y(d.avg));
+      });
   }
 
   zoomSlider.on("input", updateYAxis);
 
   svg.on("wheel", (event) => {
     event.preventDefault();
-    const delta = event.deltaY / 50000;
+    const delta = event.deltaY / 500000;
     panValue = Math.max(0, Math.min(1, panValue - delta));
     updateYAxis();
   });
