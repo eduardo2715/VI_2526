@@ -61,8 +61,7 @@ function updateSelectionAcrossPlots() {
       !selectedCard ||
       (c.name === selectedCard.name &&
        c.serie === selectedCard.serie &&
-       c.set === selectedCard.set) ? 1 : 0.2
-    );
+       c.set === selectedCard.set) ? 1 : 0.1    );
 
   // Barchart rects (data bound to bars)
   d3.selectAll(".BarChart .bar").transition().duration(300)
@@ -70,7 +69,7 @@ function updateSelectionAcrossPlots() {
       !selectedCard ||
       (b.name === selectedCard.name &&
        b.serie === selectedCard.serie &&
-       b.set === selectedCard.set) ? 1 : 0.2
+       b.set === selectedCard.set) ? 1 : 0.1
     );
 
   // Slopegraph (use the global window.slopeLines array)
@@ -84,11 +83,11 @@ function updateSelectionAcrossPlots() {
 
       // line & points toggled together
       d.line.transition().duration(300)
-        .style("opacity", highlight ? 1 : 0.2)
+        .style("opacity", highlight ? 1 : 0.1)
         .attr("stroke-width", highlight ? 3 : 2);
 
       d.points.transition().duration(300)
-        .style("opacity", highlight ? 1 : 0.2);
+        .style("opacity", highlight ? 1 : 0.1);
     });
   }
 }
@@ -99,7 +98,7 @@ function init(){
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
-  d3.csv("./data/dataset.csv").then(data=>{
+  d3.csv("./data/short_dataset.csv").then(data=>{
     window.updateCharts=function(){
       const selectedYears=getCheckedValues("#year-filters").map(Number);
       const selectedSeries=getCheckedValues("#serie-filters");

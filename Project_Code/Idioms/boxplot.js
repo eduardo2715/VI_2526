@@ -9,17 +9,20 @@ function createBoxplot(data, selector) {
     "Holo Rare VSTAR","Radiant Rare","Amazing Rare","Ultra Rare","Secret Rare"
   ];
 
-  // --- Filter and group by rarity ---
-  const grouped = d3.rollups(
+  // --- Aggregate data by Pokémon (name + serie + set) AND rarity ---
+  const grouped = d3.rollup(
     data,
-    v => v.map(d => +d.avg).filter(d => !isNaN(d)), // collect prices
-    d => d.rarity
+    rows => d3.mean(rows, r => +r.avg), // Pokémon average price in this rarity
+    d => d.rarity,
+    d => `${d.name}|${d.serie_name}|${d.set_name}`
   );
 
-  // compute boxplot stats
+  // Transform grouped data into stats per rarity
   let stats = [];
-  grouped.forEach(([rarity, values]) => {
-    if (!rarityOrder.includes(rarity) || values.length === 0) return;
+  grouped.forEach((byPokemon, rarity) => {
+    if (!rarityOrder.includes(rarity)) return;
+    const values = Array.from(byPokemon.values());
+    if (values.length === 0) return;
 
     values.sort(d3.ascending);
     const q1 = d3.quantile(values, 0.25);
@@ -78,7 +81,7 @@ function createBoxplot(data, selector) {
     .attr("x", -innerHeight/2)
     .attr("y", -margin.left+20)
     .attr("text-anchor","middle")
-    .text("Price");
+    .text("Average Pokémon Price");
 
   // draw boxplots
   stats.forEach(d => {
