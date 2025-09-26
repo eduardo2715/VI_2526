@@ -96,3 +96,33 @@
   opacity: 0;
   font-size: 0.9em;
 }
+
+
+.SlopeGraph .slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ddd;
+  height: 8px; /* track thickness for horizontal */
+  border-radius: 5px;
+}
+
+.SlopeGraph .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #888;
+  cursor: pointer;
+  border: none;
+}
+
+.SlopeGraph .slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #888;
+  cursor: pointer;
+  border: none;
+}
+

@@ -1,24 +1,18 @@
-// write slopeLines to window so updateSelectionAcrossPlots can read it reliably
 window.slopeLines = [];
 
 function createSlopegraph(data, selector) {
   d3.select(selector).selectAll("*").remove();
   window.slopeLines = [];
 
-  // --- Normalize conditions ---
-  const conditionOrder = [
-    "mint","nearmint","excellent","good","lightplayed","played","poor"
-  ];
+  const conditionOrder = ["mint","nearmint","excellent","good","lightplayed","played","poor"];
 
   function normalizeCondition(cond){
-    // guard and extract second part robustly
     if (!cond || typeof cond !== "string") return null;
     const parts = cond.split("-");
     const part = parts.length > 1 ? parts[1].toLowerCase() : null;
     return conditionOrder.includes(part) ? part : null;
   }
 
-  // --- Aggregate by Pokémon + condition ---
   const grouped = d3.rollup(
     data,
     v => d3.mean(v, d => +d.avg),
@@ -45,23 +39,34 @@ function createSlopegraph(data, selector) {
     });
   });
 
-  if (aggregated.length === 0) {
-    window.slopeLines = [];
-    return;
-  }
+  if (aggregated.length === 0) return;
 
-  const width = 600,
-        height = 500,
+  const width = 600, height = 500,
         margin = {top:40, right:40, bottom:60, left:80},
         innerWidth = width - margin.left - margin.right,
         innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", height)
+    .style("overflow","visible"); // allow tooltip
 
   const g = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // --- Clip path for plot area ---
+  svg.append("defs").append("clipPath")
+    .attr("id", "clip-slope")
+    .append("rect")
+    .attr("width", innerWidth)
+    .attr("height", innerHeight)
+    .attr("x", 0)
+    .attr("y", 0);
+
+  // group with clipping for lines and dots
+  const plotArea = g.append("g")
+    .attr("class", "plot-area")
+    .attr("clip-path", "url(#clip-slope)");
 
   const allConds = Array.from(new Set(aggregated.flatMap(d => d.values.map(v => v.condition))));
   const x = d3.scalePoint()
@@ -69,13 +74,15 @@ function createSlopegraph(data, selector) {
     .range([0, innerWidth])
     .padding(0.5);
 
+  const maxY = d3.max(aggregated, d => d3.max(d.values, v => v.avg)) || 1;
   const y = d3.scaleLinear()
-    .domain([0, d3.max(aggregated, d => d3.max(d.values, v => v.avg)) || 1])
+    .domain([0, maxY])
     .nice()
     .range([innerHeight, 0]);
 
-  // vertical grid lines
-  g.selectAll(".x-line")
+  // vertical grid UNDER everything
+  const gridGroup = plotArea.append("g").attr("class","grid");
+  gridGroup.selectAll(".x-line")
     .data(allConds)
     .enter().append("line")
     .attr("class","x-line")
@@ -86,16 +93,17 @@ function createSlopegraph(data, selector) {
     .attr("stroke","#ccc");
 
   // axes
-  g.append("g")
+  const yAxis = g.append("g").attr("class","y-axis").call(d3.axisLeft(y));
+  g.append("g").attr("class","x-axis")
     .attr("transform",`translate(0,${innerHeight})`)
     .call(d3.axisBottom(x));
-  g.append("g").call(d3.axisLeft(y));
 
   g.append("text")
     .attr("x", innerWidth/2)
     .attr("y", innerHeight+40)
     .attr("text-anchor","middle")
     .text("Condition");
+
   g.append("text")
     .attr("transform","rotate(-90)")
     .attr("x", -innerHeight/2)
@@ -107,14 +115,12 @@ function createSlopegraph(data, selector) {
     .x(d => x(d.condition))
     .y(d => y(d.avg));
 
-  // --- Draw lines and dots (click only on line) ---
-  const localSlopeLines = []; // temp, will assign to window.slopeLines at end
+  const localSlopeLines = [];
 
   aggregated.forEach(d => {
     const color = TYPE_COLORS[d.type] || "#888";
 
-    // main line - clickable only
-    const line = g.append("path")
+    const line = plotArea.append("path")
       .datum(d.values)
       .attr("fill","none")
       .attr("stroke", color)
@@ -122,7 +128,6 @@ function createSlopegraph(data, selector) {
       .attr("d", lineGen)
       .attr("class", "slope-line")
       .style("cursor","pointer")
-      .style("opacity",1)
       .on("click", function(){
         selectedCard =
           selectedCard &&
@@ -132,10 +137,11 @@ function createSlopegraph(data, selector) {
             ? null
             : { name:d.name, serie:d.serie, set:d.set };
         updateSelectionAcrossPlots();
+        updateSlopeTooltips();
+        raiseSelectedElements();
       });
 
-    // dots (no interactions)
-    const pts = g.selectAll(null)
+    const points = plotArea.selectAll(null)
       .data(d.values.map(v => ({...v, name:d.name, serie:d.serie, set:d.set, type:d.type})))
       .enter().append("circle")
       .attr("class","slope-dot")
@@ -143,14 +149,101 @@ function createSlopegraph(data, selector) {
       .attr("cy", v => y(v.avg))
       .attr("r",4)
       .attr("fill", color)
-      .style("opacity",1)
-      .append("title")  // simple browser tooltip
-      .text(v => 
-            `${v.name}\nSerie: ${v.serie}\nSet: ${v.set}\nType: ${v.type}\nAvg: ${v.avg.toFixed(2)}`
-        );
-    localSlopeLines.push({ name:d.name, serie:d.serie, set:d.set, line, points:pts });
+      .each(function(v){
+        this._tooltip = `${v.name}\nSerie: ${v.serie}\nSet: ${v.set}\nType: ${v.type}\nAvg: ${v.avg.toFixed(2)}`;
+      });
+
+    const circleSelection = plotArea.selectAll("circle.slope-dot")
+      .filter((v,i,nodes) =>
+        nodes[i].__data__.name===d.name &&
+        nodes[i].__data__.serie===d.serie &&
+        nodes[i].__data__.set===d.set);
+
+    localSlopeLines.push({ name:d.name, serie:d.serie, set:d.set, line, points: circleSelection });
   });
 
-  // expose globally so updateSelectionAcrossPlots can find them
   window.slopeLines = localSlopeLines;
+
+  // --- Tooltips ---
+  function updateSlopeTooltips() {
+    d3.selectAll("circle.slope-dot").each(function(d){
+      d3.select(this).select("title").remove();
+      if (!selectedCard ||
+          (d.name === selectedCard.name &&
+           d.serie === selectedCard.serie &&
+           d.set === selectedCard.set)) {
+        d3.select(this).append("title").text(this._tooltip);
+      }
+    });
+  }
+  updateSlopeTooltips();
+
+  // --- Raise selected line + dots ---
+  function raiseSelectedElements() {
+    if (!selectedCard) return;
+    d3.selectAll(".slope-line")
+      .filter(d =>
+        d.name === selectedCard.name &&
+        d.serie === selectedCard.serie &&
+        d.set === selectedCard.set
+      )
+      .raise();
+    d3.selectAll("circle.slope-dot")
+      .filter(d =>
+        d.name === selectedCard.name &&
+        d.serie === selectedCard.serie &&
+        d.set === selectedCard.set
+      )
+      .raise();
+  }
+
+  // --- Zoom slider below chart ---
+  const zoomSliderDiv = d3.select(selector).append("div")
+    .style("margin-top","10px")
+    .style("display","flex")
+    .style("flex-direction","column")
+    .style("align-items","center");
+
+  const zoomSlider = zoomSliderDiv.append("input")
+    .attr("type","range")
+    .attr("min",0)
+    .attr("max",2)
+    .attr("step",0.01)
+    .attr("value",0)
+    .classed("slider", true)
+    .style("width","100%");
+
+  zoomSliderDiv.append("span").text("Zoom");
+
+  const targetFraction = 0.1;
+  let panValue = 0;
+
+  function updateYAxis(){
+    const logValue = +zoomSlider.property("value");
+    const linearFactor = Math.pow(10, logValue);
+    const adaptiveFactor = 1 + (linearFactor - 1) * (maxY / (maxY * targetFraction));
+    const visibleMax = maxY / adaptiveFactor;
+
+    const yMin = panValue * (maxY - visibleMax);
+    const yMax = yMin + visibleMax;
+
+    y.domain([yMin, yMax]).nice();
+
+    yAxis.transition().duration(100).call(d3.axisLeft(y));
+
+    window.slopeLines.forEach(s => {
+      s.line.transition().duration(100).attr("d", lineGen);
+      s.points.transition().duration(100)
+        .attr("cy", d => y(d.avg));
+    });
+  }
+
+  zoomSlider.on("input", updateYAxis);
+
+  svg.on("wheel", (event) => {
+    event.preventDefault();
+    const delta = event.deltaY / 50000;
+    panValue = Math.max(0, Math.min(1, panValue - delta));
+    updateYAxis();
+  });
 }

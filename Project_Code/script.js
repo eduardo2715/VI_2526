@@ -98,7 +98,7 @@ function init(){
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
-  d3.csv("./data/short_dataset.csv").then(data=>{
+  d3.csv("./data/short_dataset_prices_fixed.csv").then(data=>{
     window.updateCharts=function(){
       const selectedYears=getCheckedValues("#year-filters").map(Number);
       const selectedSeries=getCheckedValues("#serie-filters");
@@ -141,8 +141,10 @@ function init(){
 
 document.addEventListener("click", function(event){
   const isPokemonClick = event.target.closest("circle, .bar, .slope-line");
-  if(!isPokemonClick && selectedCard){
-    selectedCard=null;
+  const isSliderClick = event.target.closest("input[type=range], .slider");
+  
+  if(!isPokemonClick && !isSliderClick && selectedCard){
+    selectedCard = null;
     updateSelectionAcrossPlots();
   }
 });

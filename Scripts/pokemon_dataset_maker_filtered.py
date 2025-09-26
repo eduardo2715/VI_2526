@@ -133,12 +133,12 @@ for _, card in cards_df.iterrows():
                 "release_date": card["release_date"],
                 "price_date": date,
                 "condition": condition,
-                "avg": values.get("avg"),
+                "avg": values.get("avg")/100,
                 "count": values.get("count"),
             })
 
 # Save price evolution CSV
 price_df = pd.DataFrame(price_rows)
 price_df.sort_values(by=["serie_id", "set_id", "internal_id", "price_date"], inplace=True)
-price_df.to_csv("pokemon_cards_price_evolution_filtered.csv", index=False)
+price_df.to_csv("../Project_Code/data/dataset_fixed.csv", index=False)
 print(f"Price evolution CSV created! Total rows: {len(price_df)}")
