@@ -77,8 +77,6 @@ function createCheckboxes(containerId, items){
 }
 
 
-
-
 function getCheckedValues(containerId){
   return Array.from(d3.select(containerId).selectAll("input").nodes())
     .filter(n=>n.checked).map(n=>n.value);
@@ -137,7 +135,6 @@ function updateSelectionAcrossPlots() {
          d.serie === selectedCard.serie &&
          d.set === selectedCard.set);
 
-      // lines & points
       d.line.transition().duration(300)
         .style("opacity", highlight ? 1 : 0.1)
         .attr("stroke-width", highlight ? 3 : 2);
@@ -146,8 +143,7 @@ function updateSelectionAcrossPlots() {
         .style("opacity", highlight ? 1 : 0.1);
 
       if (highlight) {
-        d.line.raise();   // raise the line
-        d.points.raise(); // raise the dots
+        d.group.raise();   // ✅ raise the entire group (line + dots together)
       }
     });
   }
@@ -188,11 +184,11 @@ function init(){
         const noDataMsg = "No data to display for the selected filters.";
         [".ScatterPlot", ".BarChart", ".SlopeGraph", ".BoxPlot"].forEach(sel => {
           d3.select(sel).append("div")
-            .style("display", "flex")               // use flex
-            .style("align-items", "center")         // vertical centering
-            .style("justify-content", "center")     // horizontal centering
-            .style("height", "100%")                // fill container
-            .style("width", "100%")                 // optional
+            .style("display", "flex")
+            .style("align-items", "center")
+            .style("justify-content", "center")
+            .style("height", "100%")
+            .style("width", "100%")
             .style("color", "#666")
             .style("font-size", "1em")
             .text(noDataMsg);
@@ -209,10 +205,10 @@ function init(){
       // show slider and buttons
       if (sliderWrapper) sliderWrapper.style.display = "flex";
 
-      createScatterplot(filtered, ".ScatterPlot");    //(~3 seconds to generate)
-      createBarchart(filtered, ".BarChart");          //(~3 seconds to generate)
-      createSlopegraph(filtered, ".SlopeGraph");      //(~20 seconds to generate) - very slow need to optimize
-      createBoxplot(filtered, ".BoxPlot");            //(~2 seconds to generate) 
+      createScatterplot(filtered, ".ScatterPlot");
+      createBarchart(filtered, ".BarChart");
+      createSlopegraph(filtered, ".SlopeGraph");
+      createBoxplot(filtered, ".BoxPlot");
     };
 
     setupSelectAllLogic();

@@ -132,6 +132,7 @@ function createSlopegraph(data, selector) {
     name: aggregated[i].name,
     serie: aggregated[i].serie,
     set: aggregated[i].set,
+    group: d3.select(node),                       // ✅ store group
     line: d3.select(node).select("path"),
     points: d3.select(node).selectAll("circle")
   }));
