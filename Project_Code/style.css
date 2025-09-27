@@ -21,56 +21,115 @@ html, body {
 
 /* --- Filters panel --- */
 .filters {
-  width: 220px;
-  min-width: 160px;
-  max-width: 18%;
+  width: 240px;
+  min-width: 180px;
+  max-width: 20%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  background-color: #f8f8f8;
-  border-right: 1px solid #ccc;
+  padding: 15px;
+  background: linear-gradient(180deg, #fefefe, #f4f6ff);
+  border-right: 2px solid #ddd;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+  gap: 1rem;
+  font-family: 'Trebuchet MS', sans-serif;
+  overflow-y: auto;
 }
 
 .filters-header {
-  font-size: 1.2em;
+  font-size: 1.4em;
   font-weight: bold;
-  margin-bottom: 10px;
+  text-align: center;
+  color: #2c3e50;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid #ffcb05; /* Pokémon yellow accent */
+  padding-bottom: 5px;
 }
 
+/* Filter group box */
 .filter-group {
-  flex: 1 1 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  margin-bottom: 5px;
   min-height: 0;
+}
+
+/* Make tall filter groups expand evenly */
+.tall-filters {
+  flex: 1;                  /* take equal vertical space */
+  display: flex;
+  flex-direction: column;
+}
+
+.tall-filters > div {
+  flex: 1;                  /* inner list expands */
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .filter-group h4 {
-  position: sticky;
-  top: 0;
-  background: #f8f8f8;
-  z-index: 10;
-  padding: 5px 0;
-  border-bottom: 1px solid #ccc;
   font-size: 1em;
   font-weight: bold;
-  flex-shrink: 0;
+  color: #3b4cca; /* Pokémon blue */
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.filter-group > div {
-  overflow-y: auto;
-  flex: 1 1 auto;
-  padding-left: 10px;
-  min-height: 0;
+/* Custom checkboxes */
+.filter-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
+.filter-group label:hover {
+  color: #e3350d; /* Pokémon red */
+}
+
+.filter-group input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #888;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-group input[type="checkbox"]:checked {
+  background-color: #3b4cca;
+  border-color: #3b4cca;
+}
+
+.filter-group input[type="checkbox"]:checked::after {
+  content: '✔';
+  color: #fff;
+  font-size: 12px;
+  position: absolute;
+  left: 2px;
+  top: -1px;
+}
+
+/* Scrollbar styling */
 .filter-group > div::-webkit-scrollbar {
   width: 6px;
 }
 .filter-group > div::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
+  background: #bbb;
+  border-radius: 4px;
 }
 
 /* --- Charts section --- */

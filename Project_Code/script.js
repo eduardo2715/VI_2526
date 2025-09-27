@@ -20,13 +20,39 @@ const TYPES = [
 
 let selectedCard = null;
 
+// Add icons for Pokémon types
+const TYPE_ICONS = {
+  "Psychic": "🔮",
+  "Water": "💧",
+  "Colorless": "⚪",
+  "Fire": "🔥",
+  "Fighting": "🥊",
+  "Lightning": "⚡",
+  "Grass": "🌿",
+  "Metal": "⚙️",
+  "Darkness": "🌑",
+  "Dragon": "🐉"
+};
+
 function createCheckboxes(containerId, items){
   const container = d3.select(containerId);
   container.selectAll("*").remove();
   items.forEach(i=>{
     const label = container.append("label").style("display","block");
-    label.append("input").attr("type","checkbox").attr("value",i).property("checked",false);
-    label.append("span").text(i);
+    label.append("input")
+      .attr("type","checkbox")
+      .attr("value",i)
+      .property("checked",false);
+
+    // add icons for type filters
+    let text = i;
+    if(containerId === "#type-filters"){
+      const baseType = i.split(",")[0]; // e.g. "Grass,Metal" → "Grass"
+      const icon = TYPE_ICONS[baseType] || "";
+      text = `${icon} ${i}`;
+    }
+
+    label.append("span").text(text);
   });
 }
 
@@ -128,6 +154,10 @@ function init(){
       d3.select(".BarChart").selectAll("*").remove();
       d3.select(".SlopeGraph").selectAll("*").remove();
       d3.select(".BoxPlot").selectAll("*").remove();
+
+      // Reset slope zoom slider to default
+      const slopeSlider = document.getElementById("slopeZoom");
+      if (slopeSlider) slopeSlider.value = 0;
 
       const sliderWrapper = document.querySelector(".slider-wrapper");
 
