@@ -20,41 +20,65 @@ const TYPES = [
 
 let selectedCard = null;
 
-// Add icons for Pokémon types
+// Replace emojis with your own images if available
 const TYPE_ICONS = {
+  "Fire": "./images/Fire.png",
+  "Water": "./images/Water.png",
+  "Grass": "./images/Grass.png",
+  // keep emojis for others until you add images
   "Psychic": "🔮",
-  "Water": "💧",
   "Colorless": "⚪",
-  "Fire": "🔥",
   "Fighting": "🥊",
   "Lightning": "⚡",
-  "Grass": "🌿",
   "Metal": "⚙️",
   "Darkness": "🌑",
   "Dragon": "🐉"
 };
 
+
 function createCheckboxes(containerId, items){
   const container = d3.select(containerId);
   container.selectAll("*").remove();
   items.forEach(i=>{
-    const label = container.append("label").style("display","block");
+    // flex label to align image + text
+    const label = container.append("label")
+      .style("display","flex")
+      .style("align-items","center")
+      .style("gap","6px")
+      .style("margin","3px 0")
+      .style("font-size","0.9em")
+      .style("cursor","pointer");
+
     label.append("input")
       .attr("type","checkbox")
       .attr("value",i)
       .property("checked",false);
 
-    // add icons for type filters
-    let text = i;
     if(containerId === "#type-filters"){
-      const baseType = i.split(",")[0]; // e.g. "Grass,Metal" → "Grass"
+      const baseType = i.split(",")[0];
       const icon = TYPE_ICONS[baseType] || "";
-      text = `${icon} ${i}`;
-    }
 
-    label.append("span").text(text);
+      label.append("span").text(i);
+
+      // if icon is an image file, append it
+      if(icon.endsWith(".png") || icon.endsWith(".jpg") || icon.endsWith(".svg")){
+        label.append("img")
+          .attr("src", icon)
+          .attr("alt", baseType)
+          .style("width","18px")
+          .style("height","18px");
+      } else {
+        // fallback emoji
+        label.append("span").text(icon);
+      }
+    } else {
+      label.append("span").text(i);
+    }
   });
 }
+
+
+
 
 function getCheckedValues(containerId){
   return Array.from(d3.select(containerId).selectAll("input").nodes())
