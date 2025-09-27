@@ -25,14 +25,13 @@ const TYPE_ICONS = {
   "Fire": "./images/Fire.png",
   "Water": "./images/Water.png",
   "Grass": "./images/Grass.png",
-  // keep emojis for others until you add images
-  "Psychic": "🔮",
-  "Colorless": "⚪",
-  "Fighting": "🥊",
-  "Lightning": "⚡",
-  "Metal": "⚙️",
-  "Darkness": "🌑",
-  "Dragon": "🐉"
+  "Psychic": "./images/Psychic.png",
+  "Colorless": "./images/Colorless.png",
+  "Fighting": "./images/Fighting.png",
+  "Lightning": "./images/Electric.png",
+  "Metal": "./images/Metal.png",
+  "Darkness": "./images/Dark.png",
+  "Dragon": "./images/Dragon.png"
 };
 
 
