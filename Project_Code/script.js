@@ -159,7 +159,7 @@ function init(){
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
-  d3.csv("./data/short_dataset_prices_fixed.csv").then(data=>{
+  d3.csv("./data/dataset_prices_fixed.csv").then(data=>{
     window.updateCharts = function() {
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
@@ -209,10 +209,10 @@ function init(){
       // show slider and buttons
       if (sliderWrapper) sliderWrapper.style.display = "flex";
 
-      createScatterplot(filtered, ".ScatterPlot");
-      createBarchart(filtered, ".BarChart");
-      createSlopegraph(filtered, ".SlopeGraph");
-      createBoxplot(filtered, ".BoxPlot");
+      createScatterplot(filtered, ".ScatterPlot");    //(~3 seconds to generate)
+      createBarchart(filtered, ".BarChart");          //(~3 seconds to generate)
+      createSlopegraph(filtered, ".SlopeGraph");      //(~20 seconds to generate) - very slow need to optimize
+      createBoxplot(filtered, ".BoxPlot");            //(~2 seconds to generate) 
     };
 
     setupSelectAllLogic();
