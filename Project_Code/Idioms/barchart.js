@@ -30,72 +30,91 @@ function createBarchart(data, selector) {
     });
   });
 
-  let top10 = aggregated.sort((a, b) => d3.descending(a.count, b.count)).slice(0, 10);
+  let top10 = aggregated.sort((a,b) => d3.descending(a.count,b.count)).slice(0,10);
   if (top10.length === 0) return;
 
-  // --- Get container size dynamically ---
   const container = document.querySelector(selector);
   const width = container.clientWidth;
   const height = container.clientHeight;
-  const margin = { top: 40, right: 20, bottom: 20, left: 140 };
+
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const margin = { top: 2.5*rem, right: 1.25*rem, bottom: 3.75*rem, left: 8.75*rem };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
-                .attr("width", "100%")
-                .attr("height", "100%")
-                .attr("viewBox", `0 0 ${width} ${height}`)
-                .attr("preserveAspectRatio", "xMidYMid meet");
+                .attr("width","100%")
+                .attr("height","100%")
+                .attr("viewBox",`0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio","xMidYMid meet");
 
   const g = svg.append("g")
                .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Scales
   const y = d3.scaleBand()
               .domain(top10.map(d => `${d.name}---${d.serie}---${d.set}`))
               .range([0, innerHeight])
               .padding(0.2);
 
   const x = d3.scaleLinear()
-              .domain([0, d3.max(top10, d => d.count)])
+              .domain([0, d3.max(top10,d=>d.count)])
               .range([0, innerWidth]);
 
   // Axes
-  g.append("g")
-   .call(d3.axisLeft(y).tickFormat(t => t.split('---')[0]))
-   .selectAll("text")
-   .style("font-size", "14px");
+  const yAxis = g.append("g")
+                 .attr("class","axis")
+                 .call(d3.axisLeft(y).tickFormat(t=>t.split('---')[0]));
 
-  g.append("g")
-   .attr("transform", `translate(0,${innerHeight})`)
-   .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s")));
+  const xAxis = g.append("g")
+                 .attr("class","axis")
+                 .attr("transform", `translate(0,${innerHeight})`)
+                 .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s")));
+
+  yAxis.selectAll("text").attr("class","axis-text");
+  xAxis.selectAll("text").attr("class","axis-text");
+
+  // --- Axis Titles ---
+  g.append("text")
+    .attr("class","axis-title")
+    .attr("x", innerWidth / 2)
+    .attr("y", innerHeight + 2.5*rem)  // X-axis title stays at bottom
+    .attr("text-anchor","middle")
+    .text("Total Count (Sales Volume)");
+
+  // Y-axis label - horizontal above bars
+  g.append("text")
+    .attr("class","axis-title")
+    .attr("x", -margin.left + rem) // a bit inside from left
+    .attr("y", -0.5*rem)                 // slightly above top of chart area
+    .attr("text-anchor","start")         // aligns start of text with position
+    .text("Pokémons");
 
   // Tooltip
   const tooltip = d3.select("#tooltip");
 
   // Bars
   barRects = g.selectAll(".bar")
-    .data(top10)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("y", d => y(`${d.name}---${d.serie}---${d.set}`))
-    .attr("x", 0)
-    .attr("height", y.bandwidth())
-    .attr("width", d => x(d.count))
-    .attr("fill", d => TYPE_COLORS[d.type] || "#888")
-    .attr("data-name", d => d.name)
-    .attr("data-serie", d => d.serie)
-    .attr("data-set", d => d.set)
-    .style("cursor", "pointer")
-    .on("click", function(event, d) {
-      selectedCard =
-        selectedCard &&
-        selectedCard.name === d.name &&
-        selectedCard.serie === d.serie &&
-        selectedCard.set === d.set
-          ? null
-          : { name: d.name, serie: d.serie, set: d.set };
-      updateSelectionAcrossPlots();
-    });
+              .data(top10)
+              .enter()
+              .append("rect")
+              .attr("class", "bar")
+              .attr("y", d => y(`${d.name}---${d.serie}---${d.set}`))
+              .attr("x", 0)
+              .attr("height", y.bandwidth())
+              .attr("width", d => x(d.count))
+              .attr("fill", d => TYPE_COLORS[d.type] || "#888")
+              .attr("data-name", d => d.name)
+              .attr("data-serie", d => d.serie)
+              .attr("data-set", d => d.set)
+              .style("cursor", "pointer")
+              .on("click", function(event,d){
+                selectedCard =
+                  selectedCard &&
+                  selectedCard.name === d.name &&
+                  selectedCard.serie === d.serie &&
+                  selectedCard.set === d.set
+                    ? null
+                    : { name: d.name, serie: d.serie, set: d.set };
+                updateSelectionAcrossPlots();
+              });
 }

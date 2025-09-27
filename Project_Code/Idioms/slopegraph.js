@@ -11,10 +11,8 @@ function createSlopegraph(data, selector) {
     return conditionOrder.includes(part) ? part : null;
   };
 
-  // --- Index by key for O(1) lookup ---
   const typeIndex = new Map(data.map(d => [`${d.name}|${d.serie_name}|${d.set_name}`, d.types]));
 
-  // --- Aggregate ---
   const grouped = d3.rollup(
     data,
     v => d3.mean(v, d => +d.avg),
@@ -46,7 +44,9 @@ function createSlopegraph(data, selector) {
   // --- Layout ---
   const container = document.querySelector(selector);
   const width = container.clientWidth, height = container.clientHeight;
-  const margin = {top:40, right:20, bottom:60, left:80};
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  const margin = {top: 2.5*rem, right: 1.25*rem, bottom: 3.75*rem, left: 5*rem};
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
@@ -69,37 +69,45 @@ function createSlopegraph(data, selector) {
     .attr("x1", d => x(d))
     .attr("x2", d => x(d))
     .attr("y1", 0)
-    .attr("y2", innerHeight)
-    .attr("stroke","#ccc");
+    .attr("y2", innerHeight);
 
-  const yAxis = g.append("g").attr("class","y-axis").call(d3.axisLeft(y));
-  g.append("g").attr("class","x-axis")
+  const yAxis = g.append("g").attr("class","axis").call(d3.axisLeft(y));
+  g.append("g").attr("class","axis x-axis")
     .attr("transform",`translate(0,${innerHeight})`)
     .call(d3.axisBottom(x));
 
-  g.append("text").attr("x",innerWidth/2).attr("y",innerHeight+40)
-    .attr("text-anchor","middle").text("Condition");
+  // Axis titles
+  g.append("text")
+    .attr("x", innerWidth/2)
+    .attr("y", innerHeight + 2.5*rem)
+    .attr("text-anchor", "middle")
+    .attr("class","axis-title")
+    .text("Condition");
+
   g.append("text")
     .attr("transform","rotate(-90)")
-    .attr("x",-innerHeight/2).attr("y",-margin.left+15)
-    .attr("text-anchor","middle").text("Average Price");
+    .attr("x",-innerHeight/2)
+    .attr("y",-margin.left + rem)
+    .attr("text-anchor","middle")
+    .attr("class","axis-title")
+    .text("Average Price");
 
   const lineGen = d3.line()
     .x(d => x(d.condition))
     .y(d => y(d.avg));
 
-  // --- Groups: one per card ---
-  const groups = g.append("g").attr("clip-path","url(#clip-slope)")
+  // Groups: one per card
+  const groups = g.append("g")
     .selectAll("g.slope")
     .data(aggregated)
     .join("g")
     .attr("class","slope");
 
-  // paths
+  // Paths
   const paths = groups.append("path")
     .attr("fill","none")
     .attr("stroke",d=>TYPE_COLORS[d.type]||"#888")
-    .attr("stroke-width",2)
+    .attr("stroke-width", 0.125*rem)
     .attr("d",d=>lineGen(d.values))
     .attr("class","slope-line")
     .style("cursor","pointer")
@@ -114,25 +122,24 @@ function createSlopegraph(data, selector) {
       updateSlopeTooltips();
     });
 
-  // circles
+  // Circles
   const circles = groups.selectAll("circle")
     .data(d=>d.values.map(v=>({...v, name:d.name, serie:d.serie, set:d.set, type:d.type})))
     .join("circle")
     .attr("class","slope-dot")
     .attr("cx",d=>x(d.condition))
     .attr("cy",d=>y(d.avg))
-    .attr("r",3.5)
+    .attr("r",0.21875*rem)
     .attr("fill",d=>TYPE_COLORS[d.type]||"#888");
 
   circles.append("title")
     .text(d=>`${d.name}\nSerie:${d.serie}\nSet:${d.set}\nType:${d.type}\nAvg:${d.avg.toFixed(2)}`);
 
-  // --- Keep references for selection logic ---
   window.slopeLines = groups.nodes().map((node,i)=>({
     name: aggregated[i].name,
     serie: aggregated[i].serie,
     set: aggregated[i].set,
-    group: d3.select(node),                       // ✅ store group
+    group: d3.select(node),
     line: d3.select(node).select("path"),
     points: d3.select(node).selectAll("circle")
   }));
@@ -146,7 +153,7 @@ function createSlopegraph(data, selector) {
   }
   updateSlopeTooltips();
 
-  // --- Zoom + Pan logic ---
+  // Zoom + slider
   const zoomSlider = d3.select("#slopeZoom");
   const targetFraction = 0.1;
   let panValue = 0;
@@ -163,20 +170,19 @@ function createSlopegraph(data, selector) {
     y.domain([yMin, yMax]).nice();
     yAxis.transition().duration(100).call(d3.axisLeft(y));
 
-    // update all in batch
     paths.transition().duration(100).attr("d",d=>lineGen(d.values));
     circles.transition().duration(100).attr("cy",d=>y(d.avg));
   }
 
   zoomSlider.on("input", updateYAxis);
 
-  // buttons
   d3.select(".slider-btn.plus").on("click", () => {
     let val = +zoomSlider.property("value");
     val = Math.min(+zoomSlider.attr("max"), val + +zoomSlider.attr("step"));
     zoomSlider.property("value", val);
     updateYAxis();
   });
+
   d3.select(".slider-btn.minus").on("click", () => {
     let val = +zoomSlider.property("value");
     val = Math.max(+zoomSlider.attr("min"), val - +zoomSlider.attr("step"));
