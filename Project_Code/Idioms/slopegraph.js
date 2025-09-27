@@ -56,6 +56,17 @@ function createSlopegraph(data, selector) {
 
   const g = svg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
 
+  // --- CLIP PATH ---
+  const clipId = "slope-clip";
+  g.append("clipPath")
+    .attr("id", clipId)
+    .append("rect")
+    .attr("width", innerWidth)
+    .attr("height", innerHeight);
+
+  // Container for lines and points with clipping
+  const linesGroup = g.append("g").attr("clip-path", `url(#${clipId})`);
+
   const allConds = [...new Set(aggregated.flatMap(d => d.values.map(v => v.condition)))];
   const x = d3.scalePoint().domain(allConds).range([0, innerWidth]).padding(0.5);
   const maxY = d3.max(aggregated, d => d3.max(d.values, v => v.avg)) || 1;
@@ -97,7 +108,7 @@ function createSlopegraph(data, selector) {
     .y(d => y(d.avg));
 
   // Groups: one per card
-  const groups = g.append("g")
+  const groups = linesGroup.append("g")
     .selectAll("g.slope")
     .data(aggregated)
     .join("g")
