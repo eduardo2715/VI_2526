@@ -94,6 +94,26 @@ function createScatterplot(data, selector) {
 
   const circleRadius = 0.25*rem;
 
+  // Tooltip div (create once if not exists)
+  let tooltip = d3.select("body").select("#tooltip");
+  if (tooltip.empty()) {
+    tooltip = d3.select("body")
+      .append("div")
+      .attr("id", "tooltip");
+  }
+
+  const TYPE_ICONS = { "Fire": "./images/Fire.png", 
+    "Water": "./images/Water.png", 
+    "Grass": "./images/Grass.png", 
+    "Psychic": "./images/Psychic.png", 
+    "Colorless": "./images/Colorless.png", 
+    "Fighting": "./images/Fighting.png", "Lightning": 
+    "./images/Electric.png", "Metal": 
+    "./images/Metal.png", "Darkness": 
+    "./images/Dark.png", "Dragon": 
+    "./images/Dragon.png" 
+  };
+
   scatterPoints = g.selectAll("circle")
     .data(aggregated)
     .enter()
@@ -103,6 +123,31 @@ function createScatterplot(data, selector) {
     .attr("r", circleRadius)
     .attr("fill", d => TYPE_COLORS[d.type] || "#888")
     .style("cursor","pointer")
+    .on("mouseover", function(event, d) {
+      tooltip
+        .style("opacity", 1)
+        .style("border-color", TYPE_COLORS[d.type] || "#3b4cca")
+        .html(`
+          <div class="tooltip-header" style="color:${TYPE_COLORS[d.type] || "#2c3e50"}">
+            ${d.name}
+            ${TYPE_ICONS[d.type] ? `<img src="${TYPE_ICONS[d.type]}" alt="${d.type}" class="type-icon">` : ""}
+          </div>
+          <em>Serie:</em> ${d.serie}<br>
+          <em>Set:</em> ${d.set}<br>
+          <em>Type:</em> ${d.type}<br>
+          <em>Count:</em> ${d.count}<br>
+          <em>Revenue:</em> ${formatRevenue(d.revenue)}<br>
+          <em>Popularity Rank:</em> ${d.rank}
+        `);
+    })
+    .on("mousemove", function(event) {
+      tooltip
+        .style("left", (event.pageX + 12) + "px")
+        .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseout", function() {
+      tooltip.style("opacity", 0);
+    })
     .on("click", function(event,d){
       selectedCard =
         selectedCard &&
@@ -112,9 +157,5 @@ function createScatterplot(data, selector) {
           ? null
           : {name:d.name,serie:d.serie,set:d.set};
       updateSelectionAcrossPlots();
-    })
-    .append("title")
-    .text(d =>
-      `${d.name}\nSerie: ${d.serie}\nSet: ${d.set}\nType: ${d.type}\nCount: ${d.count}\nRevenue: ${formatRevenue(d.revenue)}\nPopularity Rank: ${d.rank}`
-    );
+    });
 }
