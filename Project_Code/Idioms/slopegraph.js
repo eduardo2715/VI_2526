@@ -64,7 +64,6 @@ function createSlopegraph(data, selector) {
     .attr("width", innerWidth)
     .attr("height", innerHeight);
 
-  // Container for lines and points with clipping
   const linesGroup = g.append("g").attr("clip-path", `url(#${clipId})`);
 
   const allConds = [...new Set(aggregated.flatMap(d => d.values.map(v => v.condition)))];
@@ -80,14 +79,17 @@ function createSlopegraph(data, selector) {
     .attr("x1", d => x(d))
     .attr("x2", d => x(d))
     .attr("y1", 0)
-    .attr("y2", innerHeight);
+    .attr("y2", innerHeight)
+    .attr("stroke-dasharray", "2,2");
 
-  const yAxis = g.append("g").attr("class","axis").call(d3.axisLeft(y));
   g.append("g").attr("class","axis x-axis")
     .attr("transform",`translate(0,${innerHeight})`)
     .call(d3.axisBottom(x));
 
-  // Axis titles
+  const yAxis = g.append("g")
+    .attr("class","axis y-axis")
+    .call(d3.axisLeft(y).tickFormat(d => `$${d}`));
+
   g.append("text")
     .attr("x", innerWidth/2)
     .attr("y", innerHeight + 2.5*rem)
@@ -101,20 +103,18 @@ function createSlopegraph(data, selector) {
     .attr("y",-margin.left + rem)
     .attr("text-anchor","middle")
     .attr("class","axis-title")
-    .text("Average Price");
+    .text("Average Price ($)");
 
   const lineGen = d3.line()
     .x(d => x(d.condition))
     .y(d => y(d.avg));
 
-  // Groups: one per card
   const groups = linesGroup.append("g")
     .selectAll("g.slope")
     .data(aggregated)
     .join("g")
     .attr("class","slope");
 
-  // Paths
   const paths = groups.append("path")
     .attr("fill","none")
     .attr("stroke",d=>TYPE_COLORS[d.type]||"#888")
@@ -133,7 +133,6 @@ function createSlopegraph(data, selector) {
       updateSlopeTooltips();
     });
 
-  // Circles
   const circles = groups.selectAll("circle")
     .data(d=>d.values.map(v=>({...v, name:d.name, serie:d.serie, set:d.set, type:d.type})))
     .join("circle")
@@ -164,10 +163,17 @@ function createSlopegraph(data, selector) {
   }
   updateSlopeTooltips();
 
-  // Zoom + slider
+  // --- Zoom + slider ---
   const zoomSlider = d3.select("#slopeZoom");
   const targetFraction = 0.1;
   let panValue = 0;
+
+  // Default slider setup
+  // Value goes from MIN at bottom → MAX at top
+  zoomSlider.attr("min", 0)
+    .attr("max", 3)
+    .attr("step", 0.1)
+    .property("value", 0);
 
   function updateYAxis() {
     const logValue = +zoomSlider.property("value");
@@ -179,14 +185,17 @@ function createSlopegraph(data, selector) {
     const yMax = yMin + visibleMax;
 
     y.domain([yMin, yMax]).nice();
-    yAxis.transition().duration(100).call(d3.axisLeft(y));
+    yAxis.transition().duration(100)
+        .call(d3.axisLeft(y).tickFormat(d => `$${d}`));
 
-    paths.transition().duration(100).attr("d",d=>lineGen(d.values));
-    circles.transition().duration(100).attr("cy",d=>y(d.avg));
+    paths.transition().duration(100).attr("d", d => lineGen(d.values));
+    circles.transition().duration(100).attr("cy", d => y(d.avg));
   }
 
+  // Slider input
   zoomSlider.on("input", updateYAxis);
 
+  // Buttons
   d3.select(".slider-btn.plus").on("click", () => {
     let val = +zoomSlider.property("value");
     val = Math.min(+zoomSlider.attr("max"), val + +zoomSlider.attr("step"));
@@ -201,10 +210,14 @@ function createSlopegraph(data, selector) {
     updateYAxis();
   });
 
+  // Mouse wheel panning
   svg.on("wheel", (event) => {
     event.preventDefault();
-    const delta = event.deltaY / 50000;
+    const delta = event.deltaY / 200000; // smaller step than 50000
     panValue = Math.max(0, Math.min(1, panValue - delta));
     updateYAxis();
   });
+
+  // initialize
+  updateYAxis();
 }

@@ -53,11 +53,13 @@
           <div class="SlopeGraph-container">
             <div class="SlopeGraph"></div>
 
-            <div class="slider-wrapper">
+            <div class="slider-container">
+              <span class="slider-label">Zoom</span>
               <button class="slider-btn plus">+</button>
-              <input type="range" min="0" max="2" step="0.03" value="0"
-                    class="slider" id="slopeZoom">
-              <button class="slider-btn minus">-</button>
+              <div class="slider-wrapper">
+                <input id="slopeZoom" class="slider" type="range" min="0" max="3" step="0.1" value="1">
+              </div>
+              <button class="slider-btn minus">−</button>
             </div>
           </div>
 

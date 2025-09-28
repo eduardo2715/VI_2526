@@ -76,7 +76,7 @@ function createBoxplot(data, selector) {
 
   const yAxis = g.append("g")
                  .attr("class","axis")
-                 .call(d3.axisLeft(y));
+                 .call(d3.axisLeft(y).tickFormat(d => `$${d}`));
 
   // Axis Titles
   g.append("text")
@@ -92,7 +92,7 @@ function createBoxplot(data, selector) {
    .attr("x", -innerHeight / 2)
    .attr("y", -margin.left + 1.25*rem)
    .attr("text-anchor","middle")
-   .text("Average Pokémon Price");
+   .text("Average Pokémon Price ($)");
 
   // Draw boxplots
   stats.forEach(d => {

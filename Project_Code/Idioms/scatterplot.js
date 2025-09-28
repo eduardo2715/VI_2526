@@ -92,7 +92,7 @@ function createScatterplot(data, selector) {
    .attr("class","axis-title")
    .text("Total Revenue ($)");
 
-  const circleRadius = 0.375*rem;
+  const circleRadius = 0.25*rem;
 
   scatterPoints = g.selectAll("circle")
     .data(aggregated)
