@@ -41,7 +41,7 @@ function createScatterplot(data, selector) {
   const height = container.clientHeight;
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-  const margin = { top: 2.5*rem, right: 1.25*rem, bottom: 3.75*rem, left: 5*rem };
+  const margin = { top: 4*rem, right: 1.25*rem, bottom: 3.75*rem, left: 5*rem }; // increased top margin for title
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
@@ -52,6 +52,14 @@ function createScatterplot(data, selector) {
 
   const g = svg.append("g")
     .attr("transform",`translate(${margin.left},${margin.top})`);
+
+  // --- Chart Title ---
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", margin.top / 2)
+    .attr("text-anchor", "middle")
+    .attr("class", "chart-title")
+    .text("Sales Volume vs Revenue");
 
   const x = d3.scaleLinear()
     .domain([0,d3.max(aggregated,d=>d.count)||1])
@@ -74,7 +82,6 @@ function createScatterplot(data, selector) {
    .call(d3.axisLeft(y).tickFormat(d=>formatRevenue(d)).ticks(Math.min(innerHeight/50,10)))
    .attr("class","axis");
 
-  // X-axis title
   g.append("text")
    .attr("x",innerWidth/2)
    .attr("y",innerHeight + 2.5*rem)
@@ -82,7 +89,6 @@ function createScatterplot(data, selector) {
    .attr("class","axis-title")
    .text("Total Count (Sales Volume)");
 
-  // Y-axis title
   g.append("text")
    .attr("transform","rotate(-90)")
    .attr("x",-innerHeight/2)
@@ -94,7 +100,6 @@ function createScatterplot(data, selector) {
 
   const circleRadius = 0.25*rem;
 
-  // Tooltip div (create once if not exists)
   let tooltip = d3.select("body").select("#tooltip");
   if (tooltip.empty()) {
     tooltip = d3.select("body")
@@ -107,11 +112,11 @@ function createScatterplot(data, selector) {
     "Grass": "./images/Grass.png", 
     "Psychic": "./images/Psychic.png", 
     "Colorless": "./images/Colorless.png", 
-    "Fighting": "./images/Fighting.png", "Lightning": 
-    "./images/Electric.png", "Metal": 
-    "./images/Metal.png", "Darkness": 
-    "./images/Dark.png", "Dragon": 
-    "./images/Dragon.png" 
+    "Fighting": "./images/Fighting.png", 
+    "Lightning": "./images/Electric.png", 
+    "Metal": "./images/Metal.png", 
+    "Darkness": "./images/Dark.png", 
+    "Dragon": "./images/Dragon.png" 
   };
 
   scatterPoints = g.selectAll("circle")
@@ -124,17 +129,13 @@ function createScatterplot(data, selector) {
     .attr("fill", d => TYPE_COLORS[d.type] || "#888")
     .style("cursor","pointer")
     .on("mouseover", function(event, d) {
-      // Split multiple types by comma + trim whitespace
       const types = d.type ? d.type.split(",").map(t => t.trim()) : [];
-
-      // Build icon HTML for all types
       const iconsHTML = types
         .map(t => TYPE_ICONS[t] ? `<img src="${TYPE_ICONS[t]}" alt="${t}" class="type-icon">` : "")
         .join("");
-
       tooltip
         .style("opacity", 1)
-        .style("border-color", TYPE_COLORS[types[0]] || "#3b4cca") // use first type for border
+        .style("border-color", TYPE_COLORS[types[0]] || "#3b4cca")
         .html(`
           <div class="tooltip-header" style="color:${TYPE_COLORS[types[0]] || "#2c3e50"}">
             ${d.name} ${iconsHTML}

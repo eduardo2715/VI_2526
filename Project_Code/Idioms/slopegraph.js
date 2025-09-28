@@ -46,13 +46,21 @@ function createSlopegraph(data, selector) {
   const width = container.clientWidth, height = container.clientHeight;
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-  const margin = {top: 2.5*rem, right: 1.25*rem, bottom: 3.75*rem, left: 5*rem};
+  const margin = {top: 4*rem, right: 1.25*rem, bottom: 3.75*rem, left: 5*rem}; // increased top margin
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
   const svg = d3.select(selector).append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width","100%").attr("height","100%");
+
+  // --- Chart Title ---
+  svg.append("text")
+     .attr("x", width / 2)
+     .attr("y", margin.top / 2)
+     .attr("text-anchor", "middle")
+     .attr("class", "chart-title")
+     .text("Average Card Price per Condition");
 
   const g = svg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
 
@@ -105,6 +113,7 @@ function createSlopegraph(data, selector) {
     .attr("class","axis-title")
     .text("Average Price ($)");
 
+  // --- Draw lines & dots ---
   const lineGen = d3.line()
     .x(d => x(d.condition))
     .y(d => y(d.avg));

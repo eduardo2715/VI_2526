@@ -38,7 +38,7 @@ function createBarchart(data, selector) {
   const height = container.clientHeight;
 
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  const margin = { top: 2.5*rem, right: 1.25*rem, bottom: 3.75*rem, left: 8.75*rem };
+  const margin = { top: 4*rem, right: 1.25*rem, bottom: 3.75*rem, left: 8.75*rem }; // increased top margin
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
@@ -50,6 +50,14 @@ function createBarchart(data, selector) {
 
   const g = svg.append("g")
                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // --- Chart Title ---
+  svg.append("text")
+     .attr("x", width / 2)
+     .attr("y", margin.top / 2)
+     .attr("text-anchor", "middle")
+     .attr("class", "chart-title")
+     .text("Top 10 Sold Cards");
 
   const y = d3.scaleBand()
               .domain(top10.map(d => `${d.name}---${d.serie}---${d.set}`))
@@ -77,16 +85,15 @@ function createBarchart(data, selector) {
   g.append("text")
     .attr("class","axis-title")
     .attr("x", innerWidth / 2)
-    .attr("y", innerHeight + 2.5*rem)  // X-axis title stays at bottom
+    .attr("y", innerHeight + 2.5*rem)
     .attr("text-anchor","middle")
     .text("Total Count (Sales Volume)");
 
-  // Y-axis label - horizontal above bars
   g.append("text")
     .attr("class","axis-title")
-    .attr("x", -margin.left + rem) // a bit inside from left
-    .attr("y", -0.5*rem)                 // slightly above top of chart area
-    .attr("text-anchor","start")         // aligns start of text with position
+    .attr("x", -margin.left + rem)
+    .attr("y", -0.5*rem)
+    .attr("text-anchor","start")
     .text("Pokémons");
 
   // Tooltip

@@ -40,7 +40,7 @@ function createBoxplot(data, selector) {
   const height = container.clientHeight;
 
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  const margin = { top: 2.5*rem, right: 2.5*rem, bottom: 5*rem, left: 5*rem };
+  const margin = { top: 4*rem, right: 2.5*rem, bottom: 5*rem, left: 5*rem }; // increased top margin
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
@@ -52,6 +52,14 @@ function createBoxplot(data, selector) {
 
   const g = svg.append("g")
                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // --- Chart Title ---
+  svg.append("text")
+     .attr("x", width / 2)
+     .attr("y", margin.top / 2)
+     .attr("text-anchor", "middle")
+     .attr("class", "chart-title")
+     .text("Average Price per Rarity");
 
   const x = d3.scaleBand()
               .domain(rarityOrder.filter(r => stats.find(s => s.rarity === r)))
