@@ -34,12 +34,12 @@ const TYPE_ICONS = {
   "Dragon": "./images/Dragon.png"
 };
 
-
 function createCheckboxes(containerId, items){
   const container = d3.select(containerId);
   container.selectAll("*").remove();
-  items.forEach(i=>{
-    // flex label to align image + text
+
+  items.forEach(i => {
+    // flex label to align text + icons
     const label = container.append("label")
       .style("display","flex")
       .style("align-items","center")
@@ -53,28 +53,26 @@ function createCheckboxes(containerId, items){
       .attr("value",i)
       .property("checked",false);
 
+    // always add the text
+    label.append("span").text(i);
+
+    // if this is type filters, add all type icons
     if(containerId === "#type-filters"){
-      const baseType = i.split(",")[0];
-      const icon = TYPE_ICONS[baseType] || "";
-
-      label.append("span").text(i);
-
-      // if icon is an image file, append it
-      if(icon.endsWith(".png") || icon.endsWith(".jpg") || icon.endsWith(".svg")){
-        label.append("img")
-          .attr("src", icon)
-          .attr("alt", baseType)
-          .style("width","18px")
-          .style("height","18px");
-      } else {
-        // fallback emoji
-        label.append("span").text(icon);
-      }
-    } else {
-      label.append("span").text(i);
+      const types = i.split(",").map(t => t.trim());
+      types.forEach(t => {
+        const icon = TYPE_ICONS[t];
+        if(icon && (icon.endsWith(".png") || icon.endsWith(".jpg") || icon.endsWith(".svg"))){
+          label.append("img")
+            .attr("src", icon)
+            .attr("alt", t)
+            .style("width","18px")
+            .style("height","18px");
+        }
+      });
     }
   });
 }
+
 
 
 function getCheckedValues(containerId){

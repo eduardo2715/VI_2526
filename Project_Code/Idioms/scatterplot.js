@@ -124,13 +124,20 @@ function createScatterplot(data, selector) {
     .attr("fill", d => TYPE_COLORS[d.type] || "#888")
     .style("cursor","pointer")
     .on("mouseover", function(event, d) {
+      // Split multiple types by comma + trim whitespace
+      const types = d.type ? d.type.split(",").map(t => t.trim()) : [];
+
+      // Build icon HTML for all types
+      const iconsHTML = types
+        .map(t => TYPE_ICONS[t] ? `<img src="${TYPE_ICONS[t]}" alt="${t}" class="type-icon">` : "")
+        .join("");
+
       tooltip
         .style("opacity", 1)
-        .style("border-color", TYPE_COLORS[d.type] || "#3b4cca")
+        .style("border-color", TYPE_COLORS[types[0]] || "#3b4cca") // use first type for border
         .html(`
-          <div class="tooltip-header" style="color:${TYPE_COLORS[d.type] || "#2c3e50"}">
-            ${d.name}
-            ${TYPE_ICONS[d.type] ? `<img src="${TYPE_ICONS[d.type]}" alt="${d.type}" class="type-icon">` : ""}
+          <div class="tooltip-header" style="color:${TYPE_COLORS[types[0]] || "#2c3e50"}">
+            ${d.name} ${iconsHTML}
           </div>
           <em>Serie:</em> ${d.serie}<br>
           <em>Set:</em> ${d.set}<br>
