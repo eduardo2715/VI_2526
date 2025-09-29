@@ -124,7 +124,7 @@ function updateSelectionAcrossPlots() {
        b.set === selectedCard.set) ? 1 : 0.1
     );
 
-  // Slopegraph
+  // LineChart
   if (window.slopeLines && Array.isArray(window.slopeLines)) {
     window.slopeLines.forEach(d => {
       const highlight =
@@ -153,7 +153,7 @@ function init(){
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
-  d3.csv("./data/dataset_prices_fixed.csv").then(data=>{
+  d3.csv("./data/dataset.csv").then(data=>{
     window.updateCharts = function() {
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
@@ -169,7 +169,7 @@ function init(){
 
       d3.select(".ScatterPlot").selectAll("*").remove();
       d3.select(".BarChart").selectAll("*").remove();
-      d3.select(".SlopeGraph").selectAll("*").remove();
+      d3.select(".LineChart").selectAll("*").remove();
       d3.select(".BoxPlot").selectAll("*").remove();
 
       // Reset slope zoom slider to default
@@ -180,7 +180,7 @@ function init(){
 
       if (filtered.length === 0) {
         const noDataMsg = "No data to display for the selected filters.";
-        [".ScatterPlot", ".BarChart", ".SlopeGraph", ".BoxPlot"].forEach(sel => {
+        [".ScatterPlot", ".BarChart", ".LineChart", ".BoxPlot"].forEach(sel => {
           d3.select(sel).append("div")
             .style("display", "flex")
             .style("align-items", "center")
@@ -205,7 +205,7 @@ function init(){
 
       createScatterplot(filtered, ".ScatterPlot");
       createBarchart(filtered, ".BarChart");
-      createSlopegraph(filtered, ".SlopeGraph");
+      createLineChart(filtered, ".LineChart");
       createBoxplot(filtered, ".BoxPlot");
     };
 

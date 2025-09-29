@@ -196,7 +196,7 @@ html, body {
   border: 0.1rem solid #f8d030;
 }
 
-.SlopeGraph-container {
+.LineChart-container {
   background: linear-gradient(180deg, #ecf6ff, #ffffff);
   border: 0.1rem solid #6890f0;
   display: flex;
@@ -211,7 +211,7 @@ html, body {
 .ScatterPlot,
 .BarChart,
 .BoxPlot,
-.SlopeGraph-container {
+.LineChart-container {
   padding: 0.625rem;
   box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1);
   display: flex;
@@ -252,8 +252,8 @@ html, body {
   font-weight: bold;
 }
 
-/* --- SlopeGraph styling --- */
-.SlopeGraph {
+/* --- LineChart styling --- */
+.LineChart {
   flex: 1;
   height: 100%;
   min-width: 0;
@@ -273,12 +273,12 @@ html, body {
   stroke-width: 0.0625rem;
 }
 
-.SlopeGraph .x-axis text,
-.SlopeGraph .y-axis text {
+.LineChart .x-axis text,
+.LineChart .y-axis text {
   font-size: calc(var(--chart-font-size) - 0.2rem);
 }
 
-.SlopeGraph .axis-title {
+.LineChart .axis-title {
   font-size: calc(var(--chart-font-size) + 0.125rem);
   font-weight: bold;
 }
@@ -353,7 +353,7 @@ html, body {
   box-shadow: 0 0.25em 0.5em rgba(0,0,0,0.35);
 }
 
-.SlopeGraph-container .slider {
+.LineChart-container .slider {
   width: clamp(6em, 15vh, 10em);
   height: clamp(0.7em, 1vw, 0.75em);
   transform: rotate(-90deg);
@@ -372,7 +372,7 @@ html, body {
   );
 }
 
-.SlopeGraph-container .slider::-moz-range-track {
+.LineChart-container .slider::-moz-range-track {
   background: linear-gradient(
     90deg,
     #83c761 0%,
@@ -383,7 +383,7 @@ html, body {
   );
 }
 
-.SlopeGraph-container .slider::-webkit-slider-thumb {
+.LineChart-container .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: clamp(1em, 2vw, 1.5em);
   height: clamp(1em, 2vw, 1.5em);
@@ -396,7 +396,7 @@ html, body {
   box-shadow: 0 0.1em 0.25em rgba(0,0,0,0.3);
 }
 
-.SlopeGraph-container .slider::-moz-range-thumb {
+.LineChart-container .slider::-moz-range-thumb {
   width: clamp(1em, 2vw, 1.5em);
   height: clamp(1em, 2vw, 1.5em);
   border-radius: 50%;
