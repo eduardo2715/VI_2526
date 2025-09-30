@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pokémon Scatter & Top 10 Sold</title>
+  <link rel="icon" type="image/ico" href="images/Pokeball.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="d3/d3.min.js"></script>
+</head>
+<body>
+
+  <div class="main-container">
+    <!-- Filters on the left -->
+    <div class="filters">
+      <h3 class="filters-header">Filters</h3>
+
+      <div class="filter-group tall-filters">
+        <h4>Year <input type="checkbox" class="select-all" data-target="year-filters"> Select All</h4>
+        <div id="year-filters"></div>
+      </div>
+
+      <div class="filter-group">
+        <h4>Serie <input type="checkbox" class="select-all" data-target="serie-filters"> Select All</h4>
+        <div id="serie-filters"></div>
+      </div>
+
+      <div class="filter-group tall-filters">
+        <h4>Set <input type="checkbox" class="select-all" data-target="set-filters"> Select All</h4>
+        <div id="set-filters"></div>
+      </div>
+
+      <div class="filter-group tall-filters">
+        <h4>Type <input type="checkbox" class="select-all" data-target="type-filters"> Select All</h4>
+        <div id="type-filters"></div>
+      </div>
+    </div>
+
+    <!-- Charts on the right -->
+    <div class="charts-section">
+      <h2 class="title">Pokémon Price Evolution</h2>
+
+      <div class="charts">
+        <!-- Top row -->
+        <div class="top-row">
+          <div class="ScatterPlot"></div>
+          <div class="BarChart"></div>
+        </div>
+
+        <!-- Bottom row -->
+        <div class="bottom-row">
+          <div class="LineChart-container">
+            <div class="LineChart"></div>
+          </div>
+          <div class="ViolinPlot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <script src="Idioms/type_colors.js"></script>
+  <script src="Idioms/barchart.js"></script>
+  <script src="Idioms/scatterplot.js"></script>
+  <script src="Idioms/LineChart.js"></script>
+  <script src="Idioms/ViolinPlot.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
