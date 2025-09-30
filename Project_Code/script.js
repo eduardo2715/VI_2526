@@ -1,4 +1,4 @@
-const YEARS=[1999,2000,2001,2002,2003,2004,2005,2006,2007,2020,2021,2022,2023];
+const YEARS=[1999,2000,2001,2002,2003,2004,2005,2006,2007,2020,2021,2022,2023]; 
 const SERIES = ["Base","EX","Neo","Sword & Shield"];
 const SETS = [
   "Base Set","Jungle","Fossil","Base Set 2","Team Rocket","Ruby & Sapphire",
@@ -73,8 +73,6 @@ function createCheckboxes(containerId, items){
   });
 }
 
-
-
 function getCheckedValues(containerId){
   return Array.from(d3.select(containerId).selectAll("input").nodes())
     .filter(n=>n.checked).map(n=>n.value);
@@ -110,9 +108,9 @@ function updateSelectionAcrossPlots() {
 
     d3.select(this)
       .transition().duration(300)
-      .style("opacity", highlight ? 1 : 0.1);
+      .style("opacity", highlight ? 1 : 0.1); // 🔹 dim to 0.1
 
-    if (highlight) d3.select(this).raise(); // <-- raise selected circle
+    if (highlight) d3.select(this).raise();
   });
 
   // Barchart rects
@@ -121,7 +119,7 @@ function updateSelectionAcrossPlots() {
       !selectedCard ||
       (b.name === selectedCard.name &&
        b.serie === selectedCard.serie &&
-       b.set === selectedCard.set) ? 1 : 0.1
+       b.set === selectedCard.set) ? 1 : 0.1 // 🔹 dim to 0.1
     );
 
   // LineChart
@@ -134,18 +132,19 @@ function updateSelectionAcrossPlots() {
          d.set === selectedCard.set);
 
       d.line.transition().duration(300)
-        .style("opacity", highlight ? 1 : 0.1)
+        .style("opacity", highlight ? 1 : 0.01) // 🔹 dim to 0.05
         .attr("stroke-width", highlight ? 3 : 2);
 
       d.points.transition().duration(300)
-        .style("opacity", highlight ? 1 : 0.1);
+        .style("opacity", highlight ? 1 : 0.01); // 🔹 dim to 0.05
 
       if (highlight) {
-        d.group.raise();   // ✅ raise the entire group (line + dots together)
+        d.group.raise();
       }
     });
   }
 }
+
 
 function init(){
   createCheckboxes("#year-filters",YEARS);
@@ -167,7 +166,6 @@ function init(){
         (selectedTypes.length === 0 || selectedTypes.includes(d.types))
       );
 
-      d3.select(".ScatterPlot").selectAll("*").remove();
       d3.select(".BarChart").selectAll("*").remove();
       d3.select(".LineChart").selectAll("*").remove();
       d3.select(".BoxPlot").selectAll("*").remove();
@@ -193,23 +191,20 @@ function init(){
         });
         window.slopeLines = [];
 
-        // hide slider and buttons
-        const sliderWrapper = document.querySelector(".slider-wrapper");
         if (sliderWrapper) sliderWrapper.style.display = "none";
-
         return;
       }
 
-      // show slider and buttons
       if (sliderWrapper) sliderWrapper.style.display = "flex";
 
-      createScatterplot(filtered, ".ScatterPlot");
+      updateScatterplot(filtered, ".ScatterPlot"); // ✅ animated update
       createBarchart(filtered, ".BarChart");
       createLineChart(filtered, ".LineChart");
       createBoxplot(filtered, ".BoxPlot");
     };
 
     setupSelectAllLogic();
+    initScatterplot(".ScatterPlot"); // ✅ one-time init
     updateCharts();
   });
 }
