@@ -140,9 +140,19 @@ function init(){
       d3.select(".ViolinPlot").selectAll("*").remove();
 
       if (filtered.length === 0) {
-        const noDataMsg = "No data to display for the selected filters.";
-        [".ScatterPlot"].forEach(sel => {
+        // Fade out scatterplot points instead of removing instantly
+        d3.select(".ScatterPlot").selectAll("circle")
+          .transition().duration(500)
+          .style("opacity", 0)
+          .remove();
+
+        // Remove old "no data" msgs (avoid duplicates)
+        d3.selectAll(".no-data-msg").remove();
+
+        // Show message overlay
+        [".ScatterPlot", ".BarChart", ".LineChart", ".ViolinPlot"].forEach(sel => {
           d3.select(sel).append("div")
+            .attr("class", "no-data-msg")
             .style("display", "flex")
             .style("align-items", "center")
             .style("justify-content", "center")
@@ -150,15 +160,21 @@ function init(){
             .style("width", "100%")
             .style("color", "#666")
             .style("font-size", "1em")
-            .text(noDataMsg);
+            .text("No data to display for the selected filters.");
         });
+
         return;
       }
 
-      updateScatterplot(filtered, ".ScatterPlot"); // ✅ animated update
+      // ✅ Data exists: remove any "no data" msgs
+      d3.selectAll(".no-data-msg").remove();
+
+      // Then update plots
+      updateScatterplot(filtered, ".ScatterPlot");
       createBarchart(filtered, ".BarChart");
       createLineChart(filtered, ".LineChart");
-      createViolinPlot(filtered, ".ViolinPlot");   //change to violin plot
+      createViolinPlot(filtered, ".ViolinPlot");
+
     };
 
     setupSelectAllLogic();

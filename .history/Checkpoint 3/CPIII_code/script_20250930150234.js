@@ -137,7 +137,7 @@ function init(){
 
       d3.select(".BarChart").selectAll("*").remove();
       d3.select(".LineChart").selectAll("*").remove();
-      d3.select(".BoxPlot").selectAll("*").remove();
+      d3.select(".ViolinPlot").selectAll("*").remove();
 
       // Reset slope zoom slider to default
       const slopeSlider = document.getElementById("slopeZoom");
@@ -166,7 +166,7 @@ function init(){
       updateScatterplot(filtered, ".ScatterPlot"); // ✅ animated update
       createBarchart(filtered, ".BarChart");
       createLineChart(filtered, ".LineChart");
-      createBoxplot(filtered, ".BoxPlot");   //change to violin plot
+      createViolinPlot(filtered, ".ViolinPlot");   //change to violin plot
     };
 
     setupSelectAllLogic();

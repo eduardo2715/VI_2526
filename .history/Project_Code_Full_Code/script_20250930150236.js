@@ -61,7 +61,7 @@ function createCheckboxes(containerId, items){
       const types = i.split(",").map(t => t.trim());
       types.forEach(t => {
         const icon = TYPE_ICONS[t];
-        if(icon && icon.endsWith(".png")){
+        if(icon && (icon.endsWith(".png") || icon.endsWith(".jpg") || icon.endsWith(".svg"))){
           label.append("img")
             .attr("src", icon)
             .attr("alt", t)
@@ -112,6 +112,37 @@ function updateSelectionAcrossPlots() {
 
     if (highlight) d3.select(this).raise();
   });
+
+  // Barchart rects
+  d3.selectAll(".BarChart .bar").transition().duration(300)
+    .style("opacity", b =>
+      !selectedCard ||
+      (b.name === selectedCard.name &&
+       b.serie === selectedCard.serie &&
+       b.set === selectedCard.set) ? 1 : 0.1 // 🔹 dim to 0.1
+    );
+
+  // LineChart
+  if (window.slopeLines && Array.isArray(window.slopeLines)) {
+    window.slopeLines.forEach(d => {
+      const highlight =
+        !selectedCard ||
+        (d.name === selectedCard.name &&
+         d.serie === selectedCard.serie &&
+         d.set === selectedCard.set);
+
+      d.line.transition().duration(300)
+        .style("opacity", highlight ? 1 : 0.01) // 🔹 dim to 0.05
+        .attr("stroke-width", highlight ? 3 : 2);
+
+      d.points.transition().duration(300)
+        .style("opacity", highlight ? 1 : 0.01); // 🔹 dim to 0.05
+
+      if (highlight) {
+        d.group.raise();
+      }
+    });
+  }
 }
 
 
@@ -137,11 +168,17 @@ function init(){
 
       d3.select(".BarChart").selectAll("*").remove();
       d3.select(".LineChart").selectAll("*").remove();
-      d3.select(".ViolinPlot").selectAll("*").remove();
+      d3.select(".BoxPlot").selectAll("*").remove();
+
+      // Reset slope zoom slider to default
+      const slopeSlider = document.getElementById("slopeZoom");
+      if (slopeSlider) slopeSlider.value = 0;
+
+      const sliderWrapper = document.querySelector(".slider-wrapper");
 
       if (filtered.length === 0) {
         const noDataMsg = "No data to display for the selected filters.";
-        [".ScatterPlot"].forEach(sel => {
+        [".ScatterPlot", ".BarChart", ".LineChart", ".BoxPlot"].forEach(sel => {
           d3.select(sel).append("div")
             .style("display", "flex")
             .style("align-items", "center")
@@ -152,13 +189,18 @@ function init(){
             .style("font-size", "1em")
             .text(noDataMsg);
         });
+        window.slopeLines = [];
+
+        if (sliderWrapper) sliderWrapper.style.display = "none";
         return;
       }
+
+      if (sliderWrapper) sliderWrapper.style.display = "flex";
 
       updateScatterplot(filtered, ".ScatterPlot"); // ✅ animated update
       createBarchart(filtered, ".BarChart");
       createLineChart(filtered, ".LineChart");
-      createViolinPlot(filtered, ".ViolinPlot");   //change to violin plot
+      createBoxplot(filtered, ".BoxPlot");
     };
 
     setupSelectAllLogic();
@@ -168,8 +210,8 @@ function init(){
 }
 
 document.addEventListener("click", function(event){
-  const isPokemonClick = event.target.closest("circle");
-  const isSliderClick = event.target.closest("input[type=range]");
+  const isPokemonClick = event.target.closest("circle, .bar, .slope-line");
+  const isSliderClick = event.target.closest("input[type=range], .slider, .slider-btn");
   
   if(!isPokemonClick && !isSliderClick && selectedCard){
     selectedCard = null;

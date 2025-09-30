@@ -1,9 +1,9 @@
-function createBoxplot(data, selector) {
+function createViolinePlot(data, selector) {
   d3.select(selector).selectAll("*").remove(); // clear old content
 
   d3.select(selector)
     .append("img")
-    .attr("src", "./images/LineChart.jpg")
+    .attr("src", "./images/ViolinePlot.jpg")
     .attr("alt", "Violin Plot placeholder")
     .style("width", "100%")
     .style("height", "100%")

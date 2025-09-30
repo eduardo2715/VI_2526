@@ -141,7 +141,7 @@ function init(){
 
       if (filtered.length === 0) {
         const noDataMsg = "No data to display for the selected filters.";
-        [".ScatterPlot"].forEach(sel => {
+        [".ScatterPlot", ".BarChart", ".LineChart", ".ViolinPlot"].forEach(sel => {
           d3.select(sel).append("div")
             .style("display", "flex")
             .style("align-items", "center")

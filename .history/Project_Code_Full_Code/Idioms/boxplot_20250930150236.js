@@ -1,6 +1,6 @@
 let boxGroups = [];
 
-function createViolinPlot(data, selector) {
+function createBoxplot(data, selector) {
   d3.select(selector).selectAll("*").remove();
   boxGroups = [];
 
@@ -102,7 +102,7 @@ function createViolinPlot(data, selector) {
    .attr("text-anchor","middle")
    .text("Average Pokémon Price ($)");
 
-  // Draw ViolinPlots
+  // Draw boxplots
   stats.forEach(d => {
     const cx = x(d.rarity);
 

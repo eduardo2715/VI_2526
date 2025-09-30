@@ -1,7 +1,6 @@
-/* --- Root variable for unified chart fonts and titles --- */
+/* --- Root variable for unified chart fonts --- */
 :root {
-  --chart-font-size: 1rem;      /* Base font for axes and labels */
-  --chart-title-size: 1.5rem;   /* Chart titles font-size */
+  --chart-font-size: 1rem; /* Change this to scale all chart fonts */
 }
 
 /* --- General Reset --- */
@@ -9,7 +8,7 @@ html, body {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  font-size: 16px;
+  font-size: 16px; /* 1rem = 16px */
 }
 
 * {
@@ -24,22 +23,21 @@ html, body {
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #fcf6e4, #e3ebff);
 }
 
 /* --- Filters panel --- */
 .filters {
-  width: 16.5rem;
-  min-width: 11.25rem;
+  width: 15rem; 
+  min-width: 11.25rem; 
   max-width: 20%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0.9375rem;
+  padding: 0.9375rem; 
   background: linear-gradient(180deg, #fefefe, #f4f6ff);
-  border-right: 0.125rem solid #ddd;
+  border-right: 0.125rem solid #ddd; 
   box-shadow: 0.125rem 0 0.375rem rgba(0,0,0,0.05);
-  gap: 0.9rem;
+  gap: 1rem;
   overflow-y: auto;
 }
 
@@ -50,7 +48,7 @@ html, body {
   color: #2c3e50;
   letter-spacing: 0.031rem;
   margin-bottom: 0.5rem;
-  border-bottom: 0.125rem solid #ffcb05;
+  border-bottom: 0.125rem solid #ffcb05; 
   padding-bottom: 0.3125rem;
 }
 
@@ -142,70 +140,47 @@ html, body {
   grid-template-rows: auto 1fr;
   gap: 0.625rem;
   height: 100%;
-  padding: 0.75rem;
+  padding: 1.25rem;
 }
 
 .title {
   margin-bottom: 0.3125rem;
-  font-size: 2.5rem;
+  font-size: calc(2.5rem);
   font-weight: bold;
-  text-align: center;
-  background: linear-gradient(90deg, #e3350d, #ffcb05, #3b4cca);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: 0.05em;
-  text-shadow: 0.125rem 0.125rem 0 #2c3e50;
 }
 
 /* Charts grid */
 .charts {
   display: grid;
   grid-template-rows: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1.25rem;
   height: 100%;
   min-height: 0;
 }
 
+/* Top row */
 .top-row {
   display: grid;
   grid-template-columns: 3fr 1fr;
-  gap: 0.75rem;
+  gap: 1.25rem;
   min-height: 0;
 }
 
+/* Bottom row */
 .bottom-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1.25rem;
   min-height: 0;
 }
 
-/* Chart containers with Pokémon type accents */
-.ScatterPlot {
-  background: linear-gradient(180deg, #e8f8ee, #ffffff);
-  border: 0.1rem solid #78c850;
-}
-
-.BarChart {
-  background: linear-gradient(180deg, #ffeeeb, #ffffff);
-  border: 0.1rem solid #f08030;
-}
-
-.ViolinPlot {
-  background: linear-gradient(180deg, #fffceb, #ffffff);
-  border: 0.1rem solid #f8d030;
-}
-
-.LineChart-container {
-  background: linear-gradient(180deg, #ecf6ff, #ffffff);
-  border: 0.1rem solid #6890f0;
-}
-
-/* Shared chart styling */
+/* Chart containers */
 .ScatterPlot,
 .BarChart,
 .ViolinPlot,
 .LineChart-container {
+  background: #fff;
+  border: 0.0625rem solid #ccc;
   padding: 0.625rem;
   box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1);
   display: flex;
@@ -213,16 +188,7 @@ html, body {
   justify-content: center;
   height: 100%;
   min-height: 0;
-  border-radius: 1rem;
-}
-
-/* --- Chart Titles --- */
-.chart-title {
-  font-size: var(--chart-title-size);
-  font-weight: bold;
-  fill: #2c3e50;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
-  pointer-events: none;
+  font-size: var(--chart-font-size);
 }
 
 /* --- ScatterPlot --- */
@@ -237,7 +203,7 @@ html, body {
 }
 
 .axis text {
-  font-size: calc(var(--chart-font-size) - 0.2rem);
+  font-size: var(--chart-font-size);
 }
 
 .axis-title {
@@ -246,48 +212,122 @@ html, body {
 }
 
 /* --- LineChart styling --- */
+.LineChart-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  min-height: 0;
+}
+
 .LineChart {
   flex: 1;
   height: 100%;
   min-width: 0;
 }
 
+.slope-line {
+  stroke-width: 0.125rem; 
+  cursor: pointer;
+}
 
+.slope-dot {
+  r: 0.21875rem; 
+}
+
+.x-line {
+  stroke: #ccc;
+  stroke-width: 0.0625rem;
+}
+
+.LineChart .x-axis text,
+.LineChart .y-axis text {
+  font-size: var(--chart-font-size);
+}
+
+.LineChart .axis-title {
+  font-size: calc(var(--chart-font-size) + 0.125rem);
+  font-weight: bold;
+}
 
 /* --- ViolinPlot styling --- */
 .ViolinPlot {
   font-size: var(--chart-font-size);
 }
 
+.box {
+  stroke-width: 0.0625rem;
+}
 
-/* --- Tooltip styling (Pokémon-themed) --- */
+.median {
+  stroke-width: 0.125rem;
+}
+
+/* --- LineChart slider --- */
+
+/* --- Slider container --- */
+.slider-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.5rem, 2vh, 2rem); /* dynamic spacing between buttons and slider */
+}
+
+/* Label above slider */
+.slider-label {
+  position: absolute;
+  top: calc(-1.5em - 1vh); /* slightly above top button */
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  font-weight: bold;
+  color: #2c3e50;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+
+
+.slider-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 2.5rem;
+  height: 100%;
+  margin-left: 0.3125rem;
+  padding: 5rem 0;
+}
+
+.slider-btn {
+  width: 1.875rem;
+  height: 1.875rem;
+  border: 0.0625rem solid #ccc;
+  background: #eee;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 1.25rem;
+}
+
+.LineChart-container .slider {
+  transform: rotate(-90deg);
+  width: 11.25rem;
+  height: 0.75rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ddd;
+  border-radius: 0.3125rem;
+  margin: 0;
+}
+
+/* --- Tooltip styling --- */
 #tooltip {
   position: absolute;
   pointer-events: none;
-  background: #fff;
-  border: 0.125rem solid #3b4cca;
-  border-radius: 0.75rem;
-  box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.25);
-  padding: 0.5rem 0.75rem;
+  background: white;
+  padding: 0.3125rem; 
+  border: 0.0625rem solid #ccc;
+  border-radius: 0.25rem;
   opacity: 0;
-  transition: opacity 0.2s ease;
   font-size: var(--chart-font-size);
-  color: #2c3e50;
-  line-height: 1.2;
-  z-index: 1000;
-}
-
-#tooltip .type-icon {
-  width: 1.2em;
-  height: 1.2em;
-  margin-left: 0.3em;
-  vertical-align: middle;
-  image-rendering: crisp-edges;
-}
-
-#tooltip .tooltip-header {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-  font-size: 1.5rem;
-  text-shadow: 0.3px 0.3px 0 #000;
 }

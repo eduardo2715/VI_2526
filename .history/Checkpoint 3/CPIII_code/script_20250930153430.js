@@ -138,10 +138,12 @@ function init(){
       d3.select(".BarChart").selectAll("*").remove();
       d3.select(".LineChart").selectAll("*").remove();
       d3.select(".ViolinPlot").selectAll("*").remove();
+      d3.select(".ScatterPlot").selectAll("*").remove();  // 🔹 add this
+
 
       if (filtered.length === 0) {
         const noDataMsg = "No data to display for the selected filters.";
-        [".ScatterPlot"].forEach(sel => {
+        [".ScatterPlot", ".BarChart", ".LineChart", ".ViolinPlot"].forEach(sel => {
           d3.select(sel).append("div")
             .style("display", "flex")
             .style("align-items", "center")
