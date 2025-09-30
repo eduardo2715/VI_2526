@@ -252,6 +252,69 @@ html, body {
   min-width: 0;
 }
 
+.slope-line {
+  stroke-width: 0.125rem;
+  cursor: pointer;
+}
+
+.slope-dot {
+  r: 0.21875rem;
+}
+
+.x-line {
+  stroke: #ccc;
+  stroke-width: 0.0625rem;
+}
+
+.LineChart .x-axis text,
+.LineChart .y-axis text {
+  font-size: calc(var(--chart-font-size) - 0.2rem);
+}
+
+.LineChart .axis-title {
+  font-size: calc(var(--chart-font-size) + 0.125rem);
+  font-weight: bold;
+}
+
+/* --- BoxPlot styling --- */
+.BoxPlot {
+  font-size: var(--chart-font-size);
+}
+
+.box {
+  stroke-width: 0.0625rem;
+}
+
+.median {
+  stroke-width: 0.125rem;
+}
+
+/* --- Slider container --- */
+.slider-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.5rem, 2vh, 2rem);
+}
+
+.slider-label {
+  position: absolute;
+  top: calc(-1.5em - 1vh);
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  font-weight: bold;
+  color: #2c3e50;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.slider-wrapper {
+  display: flex;
+  justify-content: center;
+  width: clamp(1em, 3vw, 3em);
+}
+
 
 /* --- Tooltip styling (Pokémon-themed) --- */
 #tooltip {

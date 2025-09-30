@@ -252,6 +252,11 @@ html, body {
   min-width: 0;
 }
 
+/* --- BoxPlot styling --- */
+.BoxPlot {
+  font-size: var(--chart-font-size);
+}
+
 
 /* --- Tooltip styling (Pokémon-themed) --- */
 #tooltip {

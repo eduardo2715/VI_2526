@@ -253,6 +253,13 @@ html, body {
 }
 
 
+
+/* --- BoxPlot styling --- */
+.BoxPlot {
+  font-size: var(--chart-font-size);
+}
+
+
 /* --- Tooltip styling (Pokémon-themed) --- */
 #tooltip {
   position: absolute;

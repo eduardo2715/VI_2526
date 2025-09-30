@@ -245,13 +245,6 @@ html, body {
   font-weight: bold;
 }
 
-/* --- LineChart styling --- */
-.LineChart {
-  flex: 1;
-  height: 100%;
-  min-width: 0;
-}
-
 
 /* --- Tooltip styling (Pokémon-themed) --- */
 #tooltip {

@@ -252,6 +252,154 @@ html, body {
   min-width: 0;
 }
 
+.slope-line {
+  stroke-width: 0.125rem;
+  cursor: pointer;
+}
+
+.slope-dot {
+  r: 0.21875rem;
+}
+
+.x-line {
+  stroke: #ccc;
+  stroke-width: 0.0625rem;
+}
+
+.LineChart .x-axis text,
+.LineChart .y-axis text {
+  font-size: calc(var(--chart-font-size) - 0.2rem);
+}
+
+.LineChart .axis-title {
+  font-size: calc(var(--chart-font-size) + 0.125rem);
+  font-weight: bold;
+}
+
+/* --- BoxPlot styling --- */
+.BoxPlot {
+  font-size: var(--chart-font-size);
+}
+
+.box {
+  stroke-width: 0.0625rem;
+}
+
+.median {
+  stroke-width: 0.125rem;
+}
+
+/* --- Slider container --- */
+.slider-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.5rem, 2vh, 2rem);
+}
+
+.slider-label {
+  position: absolute;
+  top: calc(-1.5em - 1vh);
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  font-weight: bold;
+  color: #2c3e50;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.slider-wrapper {
+  display: flex;
+  justify-content: center;
+  width: clamp(1em, 3vw, 3em);
+}
+
+.slider-btn {
+  width: clamp(1rem, 2vw, 2rem);
+  height: clamp(1rem, 2vw, 2rem);
+  border-radius: 0.9rem;
+  font-size: clamp(2rem, 1.5vw, 0.5rem);
+  font-weight: bold;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0.15em 0.3em rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.slider-btn.plus {
+  margin-bottom: calc(clamp(1rem, 15vh, 2.5rem));
+  background: linear-gradient(145deg, #6577ff, #a3ff76);
+}
+
+.slider-btn.minus {
+  margin-top: calc(clamp(1rem, 15vh, 2.5rem));
+  background: linear-gradient(145deg, #fa9349, #ffe066);
+}
+
+.slider-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0.25em 0.5em rgba(0,0,0,0.35);
+}
+
+.LineChart-container .slider {
+  width: clamp(6em, 15vh, 10em);
+  height: clamp(0.7em, 1vw, 0.75em);
+  transform: rotate(-90deg);
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0.5em;
+  margin: 0.5rem;
+  border: 0.05em solid #2c2c2c;
+  background: linear-gradient(
+    90deg,
+    #83c761 0%,
+    #f3d456 25%,
+    #ee9658 50%,
+    #8aacfc 75%,
+    #95d377 100%
+  );
+}
+
+.LineChart-container .slider::-moz-range-track {
+  background: linear-gradient(
+    90deg,
+    #83c761 0%,
+    #f3d456 25%,
+    #ee9658 50%,
+    #8aacfc 75%,
+    #95d377 100%
+  );
+}
+
+.LineChart-container .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: clamp(1em, 2vw, 1.5em);
+  height: clamp(1em, 2vw, 1.5em);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, white 25%, black 26%, black 34%, white 35%),
+    linear-gradient(to left, #e3350d 50%, #ffffff 50%);
+  border: 0.1em solid #2c2c2c;
+  cursor: pointer;
+  box-shadow: 0 0.1em 0.25em rgba(0,0,0,0.3);
+}
+
+.LineChart-container .slider::-moz-range-thumb {
+  width: clamp(1em, 2vw, 1.5em);
+  height: clamp(1em, 2vw, 1.5em);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, white 25%, black 26%, black 34%, rgba(255, 255, 255, 0) 35%),
+    linear-gradient(to left, #e3350d 50%, #ffffff 50%);
+  border: 0.1em solid #2c2c2c;
+  box-shadow: 0 0.1em 0.25em rgba(0,0,0,0.3);
+  cursor: pointer;
+}
 
 /* --- Tooltip styling (Pokémon-themed) --- */
 #tooltip {

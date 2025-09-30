@@ -139,6 +139,12 @@ function init(){
       d3.select(".LineChart").selectAll("*").remove();
       d3.select(".BoxPlot").selectAll("*").remove();
 
+      // Reset slope zoom slider to default
+      const slopeSlider = document.getElementById("slopeZoom");
+      if (slopeSlider) slopeSlider.value = 0;
+
+      const sliderWrapper = document.querySelector(".slider-wrapper");
+
       if (filtered.length === 0) {
         const noDataMsg = "No data to display for the selected filters.";
         [".ScatterPlot"].forEach(sel => {
@@ -154,6 +160,8 @@ function init(){
         });
         return;
       }
+
+      if (sliderWrapper) sliderWrapper.style.display = "flex";
 
       updateScatterplot(filtered, ".ScatterPlot"); // ✅ animated update
       createBarchart(filtered, ".BarChart");

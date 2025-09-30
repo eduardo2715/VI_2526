@@ -252,6 +252,43 @@ html, body {
   min-width: 0;
 }
 
+.slope-line {
+  stroke-width: 0.125rem;
+  cursor: pointer;
+}
+
+.slope-dot {
+  r: 0.21875rem;
+}
+
+.x-line {
+  stroke: #ccc;
+  stroke-width: 0.0625rem;
+}
+
+.LineChart .x-axis text,
+.LineChart .y-axis text {
+  font-size: calc(var(--chart-font-size) - 0.2rem);
+}
+
+.LineChart .axis-title {
+  font-size: calc(var(--chart-font-size) + 0.125rem);
+  font-weight: bold;
+}
+
+/* --- BoxPlot styling --- */
+.BoxPlot {
+  font-size: var(--chart-font-size);
+}
+
+.box {
+  stroke-width: 0.0625rem;
+}
+
+.median {
+  stroke-width: 0.125rem;
+}
+
 
 /* --- Tooltip styling (Pokémon-themed) --- */
 #tooltip {
