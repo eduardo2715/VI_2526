@@ -135,6 +135,26 @@ html, body {
   border-radius: 0.25rem;
 }
 
+#year-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* Two columns of equal width */
+}
+
+.select-all-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* small space between "Select All" text and checkbox */
+}
+
+.filter-search {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.25rem;
+  border: 0.0625rem solid #aaa;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
 /* --- Charts section --- */
 .charts-section {
   flex: 1;
@@ -261,10 +281,10 @@ html, body {
   min-width: 0;
 }
 
-.slope-line {
+/* .slope-line {
   stroke-width: 0.125rem;
   cursor: pointer;
-}
+} */
 
 .slope-dot {
   r: 0.21875rem;
