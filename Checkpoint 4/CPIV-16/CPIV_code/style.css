@@ -245,6 +245,16 @@ html, body {
   border-radius: 1rem;
 }
 
+.BarChart .P_axis text {     /* y-axis labels */
+  font-size: calc(var(--chart-font-size) - 0.125rem);
+  fill: #333;
+}
+
+.BarChart .axis text { 
+  font-size: calc(var(--chart-font-size) - 0.125rem);
+  fill: #333;
+}
+
 /* --- Chart Titles --- */
 .chart-title {
   font-size: var(--chart-title-size);
@@ -265,8 +275,14 @@ html, body {
   stroke-width: 0.0625rem;
 }
 
-.axis text {
-  font-size: calc(var(--chart-font-size) - 0.2rem);
+.ScatterPlot .x-axis text {
+  font-size: calc(var(--chart-font-size) - 0.125rem);
+  fill: #333;
+}
+
+.ScatterPlot .y-axis text {
+  font-size: calc(var(--chart-font-size) - 0.125rem);
+  fill: #333;
 }
 
 .axis-title {
@@ -280,11 +296,6 @@ html, body {
   height: 100%;
   min-width: 0;
 }
-
-/* .slope-line {
-  stroke-width: 0.125rem;
-  cursor: pointer;
-} */
 
 .slope-dot {
   r: 0.21875rem;
