@@ -1,3 +1,8 @@
+// Scatterplot of Sales Volume vs Revenue
+// Each point is a card, colored by type
+// Hover to see details, click to select/deselect
+// Shared selection with other plots
+
 let scatterX, scatterY, scatterSvg, scatterG, scatterTooltip;
 let scatterInnerWidth, scatterInnerHeight, circleRadius;
 
@@ -109,16 +114,25 @@ function updateScatterplot(aggregated, selector){
           <em>Popularity Rank:</em> ${d.rank}
         `);
     })
-    .on("mousemove", function(event){
-      scatterTooltip.style("left",(event.pageX+12)+"px").style("top",(event.pageY-28)+"px");
+    .on("mousemove",function(event){
+      scatterTooltip.style("left",(event.pageX+15)+"px").style("top",(event.pageY-28)+"px");
     })
-    .on("mouseout", ()=>scatterTooltip.style("opacity",0))
-    .on("click", function(event,d){
-      selectedCard = selectedCard &&
-        selectedCard.name===d.name &&
-        selectedCard.serie===d.serie &&
-        selectedCard.set===d.set
-        ? null : {name:d.name,serie:d.serie,set:d.set};
+    .on("mouseout",function(){
+      scatterTooltip.transition().duration(500).style("opacity",0);
+    })
+    .on("click", function(event, d) {
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (event.ctrlKey || event.metaKey) {
+        // Multi-select toggle
+        if (selectedCards.includes(key)) {
+          selectedCards = selectedCards.filter(k => k !== key);
+        } else {
+          selectedCards.push(key);
+        }
+      } else {
+        // Single select
+        selectedCards = selectedCards.includes(key) && selectedCards.length === 1 ? [] : [key];
+      }
       updateSelectionAcrossPlots();
     })
     .transition().duration(500)

@@ -1,3 +1,19 @@
+// script.js
+
+// Import D3.js
+// Assuming D3.js is included in the HTML via a <script> tag
+
+// Import other idioms
+// Assuming these functions are defined in separate files and included in the HTML
+// e.g., <script src="Idioms/scatterplot.js"></script>
+// e.g., <script src="Idioms/barchart.js"></script>
+// e.g., <script src="Idioms/linechart.js"></script>
+// e.g., <script src="Idioms/violinplot.js"></script>
+
+const rem = 16; // Assuming 1rem = 16px
+
+// --- Global Variables ---
+
 const YEARS = [1999,2000,2001,2002,2003,2004,2005,2006,2007,2020,2021,2022,2023]; 
 const SERIES = ["Base","EX","Neo","Sword & Shield"];
 const SETS = [
@@ -18,7 +34,8 @@ const TYPES = [
   "Psychic,Darkness","Fire,Darkness","Darkness,Darkness","Metal,Darkness","Dragon"
 ];
 
-let selectedCard = null;
+// Instead of single object → now supports multiple
+let selectedCards = [];
 
 // Pokémon type icons
 const TYPE_ICONS = {
@@ -37,10 +54,7 @@ const TYPE_ICONS = {
 
 //Avoid Filter Spamming
 function lockFilters(duration = 300) {
-  // Disable all filter checkboxes
   d3.selectAll(".filters input[type=checkbox]").property("disabled", true);
-  
-  // Re-enable after `duration` ms
   setTimeout(() => {
     d3.selectAll(".filters input[type=checkbox]").property("disabled", false);
   }, duration);
@@ -57,18 +71,17 @@ function updateFilterCounts() {
   filters.forEach(f => {
     const count = getCheckedValues(f.id).length;
     const header = d3.select(f.id).node()
-      .closest(".filter-group")        // go to parent filter group
-      .querySelector("h4");            // find the header in it
+      .closest(".filter-group")
+      .querySelector("h4");
 
     d3.select(header).select(".filter-count").text(`(${count})`);
   });
 }
 
-
 function setupFilterSearch() {
   d3.selectAll(".filter-search").on("input", function() {
     const input = this.value.toLowerCase();
-    const container = d3.select(this.nextElementSibling); // the checkbox container
+    const container = d3.select(this.nextElementSibling); 
 
     container.selectAll("label").style("display", function() {
       const text = d3.select(this).text().toLowerCase();
@@ -147,11 +160,8 @@ function setupSelectAllLogic(){
 function updateSelectionAcrossPlots() {
   // Scatter
   d3.selectAll(".ScatterPlot circle").each(function(c) {
-    const highlight =
-      !selectedCard ||
-      (c.name === selectedCard.name &&
-       c.serie === selectedCard.serie &&
-       c.set === selectedCard.set);
+    const key = `${c.name}|${c.serie}|${c.set}`;
+    const highlight = selectedCards.length === 0 || selectedCards.includes(key);
 
     d3.select(this)
       .transition().duration(300)
@@ -162,49 +172,39 @@ function updateSelectionAcrossPlots() {
 
   // Bar
   d3.selectAll(".BarChart .bar").transition().duration(300)
-    .style("opacity", b =>
-      !selectedCard ||
-      (b.name === selectedCard.name &&
-       b.serie === selectedCard.serie &&
-       b.set === selectedCard.set) ? 1 : 0.1
-    );
+    .style("opacity", b => {
+      const key = `${b.name}|${b.serie}|${b.set}`;
+      return (selectedCards.length === 0 || selectedCards.includes(key)) ? 1 : 0.1;
+    });
 
   // Line chart
   if (window.slopeLines && Array.isArray(window.slopeLines)) {
     window.slopeLines.forEach(d => {
-      const isMatch =
-        selectedCard &&
-        d.name === selectedCard.name &&
-        d.serie === selectedCard.serie &&
-        d.set === selectedCard.set;
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      const isMatch = selectedCards.includes(key);
 
-      if (!selectedCard) {
-        // No selection → reset everything
+      if (selectedCards.length === 0) {
         d.line.transition().duration(500)
           .style("opacity", 1)
-          .attr("stroke-width", 0.125*16);
+          .attr("stroke-width", 0.125*rem);
 
         d.points.transition().duration(500)
           .style("opacity", 1)
-          .attr("r", 0.2*16);
+          .attr("r", 0.2*rem);
       } else {
-        // Selection active → highlight vs dim
         d.line.transition().duration(500)
           .style("opacity", isMatch ? 1 : 0.05)
-          .attr("stroke-width", isMatch ? 0.25*16 : 0.125*16);
+          .attr("stroke-width", isMatch ? 0.25*rem : 0.125*rem);
 
         d.points.transition().duration(500)
           .style("opacity", isMatch ? 1 : 0.05)
-          .attr("r", isMatch ? 0.35*16 : 0.2*16);
+          .attr("r", isMatch ? 0.35*rem : 0.2*rem);
 
         if (isMatch) d.group.raise();
       }
     });
   }
-
 }
-
-
 
 // --- Initialize ---
 function init(){
@@ -314,17 +314,12 @@ function init(){
         (selectedTypes.length===0 || selectedTypes.includes(d.type))
       );
 
-      const sliderWrapper = document.querySelector(".slider-wrapper");
-
       if(filteredScatter.length===0 && filteredLine.length===0){
         d3.selectAll(".slider-container").style("display","none");
 
-        // Fade out all existing elements
         [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
           const container = d3.select(sel);
           container.selectAll("circle, rect, line, .P_axis text").transition().duration(500).style("opacity",0).remove();
-          
-          // Append no-data-msg and fade in
           container.selectAll(".no-data-msg").remove();
           container.append("div")
             .attr("class","no-data-msg")
@@ -345,20 +340,13 @@ function init(){
       }
 
       d3.selectAll(".slider-container").style("display","flex");
+      d3.selectAll(".no-data-msg").transition().duration(300).style("opacity",0).remove();
 
-      // Remove any existing no-data messages with fade out
-      d3.selectAll(".no-data-msg")
-        .transition().duration(300)
-        .style("opacity",0)
-        .remove();
-
-      // Draw/update charts
       updateScatterplot(filteredScatter, ".ScatterPlot");
       createLineChart(filteredLine, ".LineChart");
       createBarchart(filteredScatter, ".BarChart");
       createViolinPlot(filteredScatter, ".ViolinPlot");
     };
-
 
     setupSelectAllLogic();
     initScatterplot(".ScatterPlot");
@@ -377,8 +365,8 @@ document.addEventListener("click", function(event){
   const isPokemonClick = event.target.closest("circle, .bar, .slope-line");
   const isSliderClick = event.target.closest("input[type=range], .slider, .slider-btn");
 
-  if(!isPokemonClick && !isSliderClick && selectedCard){
-    selectedCard = null;
+  if(!isPokemonClick && !isSliderClick && selectedCards.length > 0){
+    selectedCards = [];
     updateSelectionAcrossPlots();
   }
 });

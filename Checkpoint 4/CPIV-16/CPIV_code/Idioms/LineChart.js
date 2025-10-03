@@ -103,11 +103,18 @@ function createLineChart(data, selector) {
     .style("cursor","pointer")
     .style("opacity",1)
     .on("click", (event,d) => {
-      selectedCard = selectedCard &&
-        selectedCard.name===d.name &&
-        selectedCard.serie===d.serie &&
-        selectedCard.set===d.set
-        ? null : {name:d.name, serie:d.serie, set:d.set};
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (event.ctrlKey || event.metaKey) {
+        // Multi-select toggle
+        if (selectedCards.includes(key)) {
+          selectedCards = selectedCards.filter(k => k !== key);
+        } else {
+          selectedCards.push(key);
+        }
+      } else {
+        // Single select
+        selectedCards = selectedCards.includes(key) && selectedCards.length === 1 ? [] : [key];
+      }
       updateSelectionAcrossPlots();
       updateSlopeTooltips();
     });
