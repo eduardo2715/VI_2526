@@ -34,6 +34,19 @@ const TYPE_ICONS = {
   "Dragon": "./images/Dragon.png"
 };
 
+
+//Avoid Filter Spamming
+function lockFilters(duration = 500) {
+  // Disable all filter checkboxes
+  d3.selectAll(".filters input[type=checkbox]").property("disabled", true);
+  
+  // Re-enable after `duration` ms
+  setTimeout(() => {
+    d3.selectAll(".filters input[type=checkbox]").property("disabled", false);
+  }, duration);
+}
+
+
 // --- Helpers ---
 function createCheckboxes(containerId, items){
   const container = d3.select(containerId);
@@ -55,7 +68,6 @@ function createCheckboxes(containerId, items){
 
     label.append("span").text(i);
 
-    // Add icons if type filters
     if(containerId === "#type-filters"){
       const types = i.split(",").map(t => t.trim());
       types.forEach(t => {
@@ -86,17 +98,21 @@ function setupSelectAllLogic(){
       const checked=this.checked;
       d3.select(`#${targetId}`).selectAll("input").property("checked",checked);
       updateCharts();
+      lockFilters(500)
     });
 
     d3.select(`#${targetId}`).selectAll("input").on("change",function(){
       const allChecked=d3.select(`#${targetId}`).selectAll("input").nodes().every(n=>n.checked);
       selectAllBox.property("checked",allChecked);
       updateCharts();
+      lockFilters(500)
     });
   });
 }
 
+// --- Selection Highlighting ---
 function updateSelectionAcrossPlots() {
+  // Scatter
   d3.selectAll(".ScatterPlot circle").each(function(c) {
     const highlight =
       !selectedCard ||
@@ -111,16 +127,16 @@ function updateSelectionAcrossPlots() {
     if (highlight) d3.select(this).raise();
   });
 
-  // Barchart rects
+  // Bar
   d3.selectAll(".BarChart .bar").transition().duration(300)
     .style("opacity", b =>
       !selectedCard ||
       (b.name === selectedCard.name &&
        b.serie === selectedCard.serie &&
-       b.set === selectedCard.set) ? 1 : 0.1 // 🔹 dim to 0.1
+       b.set === selectedCard.set) ? 1 : 0.1
     );
 
-  // LineChart
+  // Line chart
   if (window.slopeLines && Array.isArray(window.slopeLines)) {
     window.slopeLines.forEach(d => {
       const highlight =
@@ -129,98 +145,179 @@ function updateSelectionAcrossPlots() {
          d.serie === selectedCard.serie &&
          d.set === selectedCard.set);
 
-      d.line.transition().duration(300)
-        .style("opacity", highlight ? 1 : 0.01) // 🔹 dim to 0.05
-        .attr("stroke-width", highlight ? 3 : 2);
+      d.line.transition().duration(500)
+        .style("opacity", highlight ? 1 : 0.05)
+        .attr("stroke-width", highlight ? 0.125*16 : 0.0625*16);
 
-      d.points.transition().duration(300)
-        .style("opacity", highlight ? 1 : 0.01); // 🔹 dim to 0.05
+      d.points.transition().duration(500)
+        .style("opacity", highlight ? 1 : 0.05);
 
-      if (highlight) {
-        d.group.raise();
-      }
+      if (highlight) d.group.raise();
     });
   }
 }
 
-// --- Init ---
+// --- Initialize ---
 function init(){
+
+  d3.select("#loading-overlay").style("display", "flex");
+
   createCheckboxes("#year-filters",YEARS);
   createCheckboxes("#serie-filters",SERIES);
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
-  d3.csv("./data/dataset.csv").then(data=>{
-    window.updateCharts = function() {
+  d3.csv("./data/dataset.csv").then(rawData=>{
+    // Precompute tables
+    const scatterGrouped = d3.rollup(
+      rawData,
+      rows => {
+        const totalCount = d3.sum(rows, r => +r.count);
+        const totalRevenue = d3.sum(rows, r => (+r.count) * (+r.avg));
+        const type = rows[0].types;
+        const releaseYear = +rows[0].release_year;
+        return { count: totalCount, revenue: totalRevenue, type, releaseYear };
+      },
+      d => d.name,
+      d => d.serie_name,
+      d => d.set_name
+    );
+
+    let scatterTable = [];
+    scatterGrouped.forEach((bySerie, name) => {
+      bySerie.forEach((bySet, serie) => {
+        bySet.forEach((values, set) => {
+          scatterTable.push({
+            name, serie, set,
+            count: values.count,
+            revenue: values.revenue,
+            type: values.type,
+            releaseYear: values.releaseYear
+          });
+        });
+      });
+    });
+    scatterTable.sort((a,b)=>d3.descending(a.count,b.count));
+    scatterTable.forEach((d,i)=>d.rank=i+1);
+
+    // Line chart
+    const conditionOrder = ["mint","nearmint","excellent","good","lightplayed","played","poor"];
+    const normalizeCondition = cond => {
+      if (!cond) return null;
+      const part = cond.split("-")[1]?.toLowerCase();
+      return conditionOrder.includes(part) ? part : null;
+    };
+
+    const typeIndex = new Map(rawData.map(d => [`${d.name}|${d.serie_name}|${d.set_name}`, d.types]));
+    const yearIndex = new Map(rawData.map(d => [`${d.name}|${d.serie_name}|${d.set_name}`, +d.release_year]));
+
+    const lineGrouped = d3.rollup(
+      rawData,
+      v => d3.mean(v, d => +d.avg),
+      d => d.name,
+      d => d.serie_name,
+      d => d.set_name,
+      d => normalizeCondition(d.condition)
+    );
+
+    let lineTable = [];
+    for (const [name, bySerie] of lineGrouped) {
+      for (const [serie, bySet] of bySerie) {
+        for (const [set, condMap] of bySet) {
+          const values = Array.from(condMap, ([c, avg]) => ({ condition:c, avg }))
+            .filter(d=>d.condition)
+            .sort((a,b)=>conditionOrder.indexOf(a.condition)-conditionOrder.indexOf(b.condition));
+          if(values.length){
+            lineTable.push({
+              name, serie, set,
+              type: typeIndex.get(`${name}|${serie}|${set}`),
+              releaseYear: yearIndex.get(`${name}|${serie}|${set}`),
+              values
+            });
+          }
+        }
+      }
+    }
+
+    window.scatterTable = scatterTable;
+    window.lineTable = lineTable;
+
+    // Filtering + charts
+    window.updateCharts = function(){
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
       const selectedSets = getCheckedValues("#set-filters");
       const selectedTypes = getCheckedValues("#type-filters");
 
-      const filtered = data.filter(d =>
-        (selectedYears.length === 0 || selectedYears.includes(+d.release_year)) &&
-        (selectedSeries.length === 0 || selectedSeries.includes(d.serie_name)) &&
-        (selectedSets.length === 0 || selectedSets.includes(d.set_name)) &&
-        (selectedTypes.length === 0 || selectedTypes.includes(d.types))
+      const filteredScatter = scatterTable.filter(d =>
+        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
+        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
+        (selectedTypes.length===0 || selectedTypes.includes(d.type))
       );
 
-      // Always clear other charts
-      d3.select(".BarChart").selectAll("*").remove();
-      d3.select(".LineChart").selectAll("*").remove();
-      d3.select(".ViolinPlot").selectAll("*").remove();
-
-      // Reset slope zoom slider to default
-      const slopeSlider = document.getElementById("slopeZoom");
-      if (slopeSlider) slopeSlider.value = 0;
+      const filteredLine = lineTable.filter(d =>
+        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
+        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
+        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+      );
 
       const sliderWrapper = document.querySelector(".slider-wrapper");
 
-      if (filtered.length === 0) {
-        // Fade out scatterplot points only
-        d3.select(".ScatterPlot").selectAll("circle")
-          .transition().duration(500)
-          .style("opacity", 0)
-          .remove();
+      if(filteredScatter.length===0 && filteredLine.length===0){
+        d3.selectAll(".slider-container").style("display","none");
 
-        // Remove old messages
-        d3.selectAll(".no-data-msg").remove();
-
-        // Add message overlay
-        [".ScatterPlot", ".BarChart", ".LineChart", ".ViolinPlot"].forEach(sel => {
-          d3.select(sel).append("div")
-            .attr("class", "no-data-msg")
-            .style("display", "flex")
-            .style("align-items", "center")
-            .style("justify-content", "center")
-            .style("height", "100%")
-            .style("width", "100%")
-            .style("color", "#666")
-            .style("font-size", "1em")
-            .style("text-align", "center")
-            .text("No data to display for the selected filters.");
+        // Fade out all existing elements
+        [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
+          const container = d3.select(sel);
+          container.selectAll("circle, rect, line, .P_axis text").transition().duration(500).style("opacity",0).remove();
+          
+          // Append no-data-msg and fade in
+          container.selectAll(".no-data-msg").remove();
+          container.append("div")
+            .attr("class","no-data-msg")
+            .style("display","flex")
+            .style("align-items","center")
+            .style("justify-content","center")
+            .style("height","100%")
+            .style("width","100%")
+            .style("color","#666")
+            .style("font-size","1em")
+            .style("text-align","center")
+            .style("opacity",0)
+            .text("No data to display for the selected filters.")
+            .transition().duration(500)
+            .style("opacity",1);
         });
-
-        window.slopeLines = [];
-
-        if (sliderWrapper) sliderWrapper.style.display = "none";
         return;
       }
 
-      if (sliderWrapper) sliderWrapper.style.display = "flex";
+      d3.selectAll(".slider-container").style("display","flex");
 
-      // ✅ Data exists
-      d3.selectAll(".no-data-msg").remove();
+      // Remove any existing no-data messages with fade out
+      d3.selectAll(".no-data-msg")
+        .transition().duration(300)
+        .style("opacity",0)
+        .remove();
 
-      // Redraw plots
-      updateScatterplot(filtered, ".ScatterPlot");
-      createBarchart(filtered, ".BarChart");
-      createLineChart(filtered, ".LineChart");
-      createViolinPlot(filtered, ".ViolinPlot");
+      // Draw/update charts
+      updateScatterplot(filteredScatter, ".ScatterPlot");
+      createLineChart(filteredLine, ".LineChart");
+      createBarchart(filteredScatter, ".BarChart");
+      createViolinPlot(filteredScatter, ".ViolinPlot");
     };
 
+
     setupSelectAllLogic();
-    initScatterplot(".ScatterPlot"); 
+    initScatterplot(".ScatterPlot");
     updateCharts();
+
+    d3.select("#loading-overlay")
+      .transition()
+      .duration(2000)
+      .style("opacity", 0)
+      .on("end", () => d3.select("#loading-overlay").style("display", "none"));
   });
 }
 
@@ -228,7 +325,7 @@ function init(){
 document.addEventListener("click", function(event){
   const isPokemonClick = event.target.closest("circle, .bar, .slope-line");
   const isSliderClick = event.target.closest("input[type=range], .slider, .slider-btn");
-  
+
   if(!isPokemonClick && !isSliderClick && selectedCard){
     selectedCard = null;
     updateSelectionAcrossPlots();
