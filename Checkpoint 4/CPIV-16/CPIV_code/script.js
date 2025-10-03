@@ -48,18 +48,22 @@ function lockFilters(duration = 300) {
 
 function updateFilterCounts() {
   const filters = [
-    { id: "#year-filters", label: "Year" },
-    { id: "#serie-filters", label: "Serie" },
-    { id: "#set-filters", label: "Set" },
-    { id: "#type-filters", label: "Type" },
+    { id: "#year-filters" },
+    { id: "#serie-filters" },
+    { id: "#set-filters" },
+    { id: "#type-filters" },
   ];
 
   filters.forEach(f => {
     const count = getCheckedValues(f.id).length;
-    const header = d3.select(`${f.id}`).node().previousElementSibling; // the <h4> element
+    const header = d3.select(f.id).node()
+      .closest(".filter-group")        // go to parent filter group
+      .querySelector("h4");            // find the header in it
+
     d3.select(header).select(".filter-count").text(`(${count})`);
   });
 }
+
 
 function setupFilterSearch() {
   d3.selectAll(".filter-search").on("input", function() {
