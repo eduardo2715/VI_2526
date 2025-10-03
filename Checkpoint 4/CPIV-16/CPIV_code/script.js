@@ -36,7 +36,7 @@ const TYPE_ICONS = {
 
 
 //Avoid Filter Spamming
-function lockFilters(duration = 500) {
+function lockFilters(duration = 300) {
   // Disable all filter checkboxes
   d3.selectAll(".filters input[type=checkbox]").property("disabled", true);
   
@@ -44,6 +44,33 @@ function lockFilters(duration = 500) {
   setTimeout(() => {
     d3.selectAll(".filters input[type=checkbox]").property("disabled", false);
   }, duration);
+}
+
+function updateFilterCounts() {
+  const filters = [
+    { id: "#year-filters", label: "Year" },
+    { id: "#serie-filters", label: "Serie" },
+    { id: "#set-filters", label: "Set" },
+    { id: "#type-filters", label: "Type" },
+  ];
+
+  filters.forEach(f => {
+    const count = getCheckedValues(f.id).length;
+    const header = d3.select(`${f.id}`).node().previousElementSibling; // the <h4> element
+    d3.select(header).select(".filter-count").text(`(${count})`);
+  });
+}
+
+function setupFilterSearch() {
+  d3.selectAll(".filter-search").on("input", function() {
+    const input = this.value.toLowerCase();
+    const container = d3.select(this.nextElementSibling); // the checkbox container
+
+    container.selectAll("label").style("display", function() {
+      const text = d3.select(this).text().toLowerCase();
+      return text.includes(input) ? "flex" : "none";
+    });
+  });
 }
 
 
@@ -98,14 +125,16 @@ function setupSelectAllLogic(){
       const checked=this.checked;
       d3.select(`#${targetId}`).selectAll("input").property("checked",checked);
       updateCharts();
-      lockFilters(500)
+      lockFilters()
+      updateFilterCounts();
     });
 
     d3.select(`#${targetId}`).selectAll("input").on("change",function(){
       const allChecked=d3.select(`#${targetId}`).selectAll("input").nodes().every(n=>n.checked);
       selectAllBox.property("checked",allChecked);
       updateCharts();
-      lockFilters(500)
+      lockFilters()
+      updateFilterCounts();
     });
   });
 }
@@ -139,23 +168,39 @@ function updateSelectionAcrossPlots() {
   // Line chart
   if (window.slopeLines && Array.isArray(window.slopeLines)) {
     window.slopeLines.forEach(d => {
-      const highlight =
-        !selectedCard ||
-        (d.name === selectedCard.name &&
-         d.serie === selectedCard.serie &&
-         d.set === selectedCard.set);
+      const isMatch =
+        selectedCard &&
+        d.name === selectedCard.name &&
+        d.serie === selectedCard.serie &&
+        d.set === selectedCard.set;
 
-      d.line.transition().duration(500)
-        .style("opacity", highlight ? 1 : 0.05)
-        .attr("stroke-width", highlight ? 0.125*16 : 0.0625*16);
+      if (!selectedCard) {
+        // No selection → reset everything
+        d.line.transition().duration(500)
+          .style("opacity", 1)
+          .attr("stroke-width", 0.125*16);
 
-      d.points.transition().duration(500)
-        .style("opacity", highlight ? 1 : 0.05);
+        d.points.transition().duration(500)
+          .style("opacity", 1)
+          .attr("r", 0.2*16);
+      } else {
+        // Selection active → highlight vs dim
+        d.line.transition().duration(500)
+          .style("opacity", isMatch ? 1 : 0.05)
+          .attr("stroke-width", isMatch ? 0.25*16 : 0.125*16);
 
-      if (highlight) d.group.raise();
+        d.points.transition().duration(500)
+          .style("opacity", isMatch ? 1 : 0.05)
+          .attr("r", isMatch ? 0.35*16 : 0.2*16);
+
+        if (isMatch) d.group.raise();
+      }
     });
   }
+
 }
+
+
 
 // --- Initialize ---
 function init(){
@@ -166,6 +211,8 @@ function init(){
   createCheckboxes("#serie-filters",SERIES);
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
+
+  setupFilterSearch();
 
   d3.csv("./data/dataset.csv").then(rawData=>{
     // Precompute tables

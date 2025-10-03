@@ -10,7 +10,7 @@ function createLineChart(data, selector) {
   const margin = { top: 4*rem, right: 1.25*rem, bottom: 3.75*rem, left: 5*rem };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
-  const circleRadius = 0.21875*rem;
+  const circleRadius = 0.2*rem;
 
   // Clear old chart
   d3.select(selector).selectAll("*").remove();
