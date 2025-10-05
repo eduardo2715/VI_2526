@@ -10,7 +10,7 @@
 // e.g., <script src="Idioms/linechart.js"></script>
 // e.g., <script src="Idioms/violinplot.js"></script>
 
-const rem = 16; // Assuming 1rem = 16px
+const rem = 16; // 1rem = 16px
 
 // --- Global Variables ---
 
@@ -205,6 +205,46 @@ function updateSelectionAcrossPlots() {
     });
   }
 }
+
+const infoMessages = [
+  "You can select multiple filters from each filter group.",
+  "Click on a Pokémon to select it, or Ctrl/Cmd + Click to select multiple Pokémon.",
+  "Selected Pokémon will be highlighted across all charts.",
+  "Hover over bars, points, or lines to see detailed info."
+];
+
+// Tooltip div
+const infoTooltip = d3.select("body").append("div")
+  .attr("class", "info-tooltip");
+
+// Pulsing glow animation
+d3.select(".info-icon")
+  .style("animation", "pulse 1.5s infinite")
+  .on("mouseover", function(event) {
+    infoTooltip.html(infoMessages.map(msg => `<div>• ${msg}</div>`).join(""))
+      .style("left", (event.pageX + 10) + "px")
+      .style("top", (event.pageY + 10) + "px")
+      .style("opacity", 1);
+  })
+  .on("mousemove", function(event) {
+    infoTooltip
+      .style("left", (event.pageX + 10) + "px")
+      .style("top", (event.pageY + 10) + "px");
+  })
+  .on("mouseout", function() {
+    infoTooltip.style("opacity", 0);
+  });
+
+// Pulsing keyframes (inject into DOM)
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = `
+@keyframes pulse {
+  0% { transform: scale(1); color:#555; }
+  50% { transform: scale(1.2); color:#1e90ff; }
+  100% { transform: scale(1); color:#555; }
+}`;
+document.head.appendChild(styleSheet);
 
 // --- Initialize ---
 function init(){
