@@ -56,7 +56,8 @@ function createLineChart(data, selector) {
     .attr("y1", 0)
     .attr("y2", innerHeight)
     .attr("stroke-dasharray", "2,2")
-    .attr("stroke", "#ccc");
+    .attr("stroke", "#ccc")
+    .lower();
 
   g.append("g").attr("class","axis x-axis")
     .attr("transform", `translate(0,${innerHeight})`)
