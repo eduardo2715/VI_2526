@@ -82,6 +82,12 @@ function createLineChart(data, selector) {
 
   const lineGen = d3.line().x(d => x(d.condition)).y(d => y(d.avg));
 
+  // --- Tooltip (global, like scatterplot) ---
+  let slopeTooltip = d3.select("body").select("#tooltip");
+  if(slopeTooltip.empty()){
+    slopeTooltip = d3.select("body").append("div").attr("id","tooltip");
+  }
+
   // --- JOIN ---
   const groups = linesGroup.selectAll("g.slope")
     .data(data, d => `${d.name}|${d.serie}|${d.set}`);
@@ -94,6 +100,7 @@ function createLineChart(data, selector) {
     .append("g")
     .attr("class","slope");
 
+  // add line
   groupsEnter.append("path")
     .attr("fill","none")
     .attr("stroke", d => TYPE_COLORS[d.type] || "#888")
@@ -102,22 +109,57 @@ function createLineChart(data, selector) {
     .attr("class","slope-line")
     .style("cursor","pointer")
     .style("opacity",1)
+    .on("mouseover", function(event,d){
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (selectedCards.length > 0 && !selectedCards.includes(key)) return;
+
+      d3.select(this).attr("stroke-width", 0.25*rem); // highlight line
+
+      const types = d.type ? d.type.split(",").map(t=>t.trim()):[];
+      const iconsHTML = types.map(t=>TYPE_ICONS[t]?`<img src="${TYPE_ICONS[t]}" alt="${t}" class="type-icon">`:"").join("");
+      slopeTooltip.style("opacity",1)
+        .style("border-color", TYPE_COLORS[types[0]]||"#3b4cca")
+        .html(`
+          <div class="tooltip-header" style="color:${TYPE_COLORS[types[0]]||"#2c3e50"}">
+            ${d.name} ${iconsHTML}
+          </div>
+          <em>Serie:</em> ${d.serie}<br>
+          <em>Set:</em> ${d.set}<br>
+          <em>Type:</em> ${d.type}<br>
+          <em>Conditions:</em> ${d.values.map(v=>v.condition).join(", ")}<br>
+          <em>Prices:</em> ${d.values.map(v=>"$"+v.avg.toFixed(2)).join(", ")}
+        `);
+    })
+    .on("mousemove", function(event,d){
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (selectedCards.length > 0 && !selectedCards.includes(key)) return;
+
+      slopeTooltip.style("left",(event.pageX+15)+"px").style("top",(event.pageY-28)+"px");
+    })
     .on("click", (event,d) => {
       const key = `${d.name}|${d.serie}|${d.set}`;
       if (event.ctrlKey || event.metaKey) {
-        // Multi-select toggle
         if (selectedCards.includes(key)) {
           selectedCards = selectedCards.filter(k => k !== key);
         } else {
           selectedCards.push(key);
         }
       } else {
-        // Single select
         selectedCards = selectedCards.includes(key) && selectedCards.length === 1 ? [] : [key];
       }
       updateSelectionAcrossPlots();
-      updateSlopeTooltips();
     });
+
+  // ✅ group-level mouseleave (fixes stuck tooltip/stroke)
+  groupsEnter.on("mouseleave", function(event,d){
+    const key = `${d.name}|${d.serie}|${d.set}`;
+    if (selectedCards.length > 0 && !selectedCards.includes(key)) return;
+
+    d3.select(this).select("path.slope-line")
+      .attr("stroke-width", 0.125*rem); // reset stroke
+    slopeTooltip.transition().duration(500).style("opacity",0); // hide tooltip
+  });
+
 
   groupsEnter.selectAll("circle")
     .data(d => d.values.map(v => ({...v, name:d.name, serie:d.serie, set:d.set, type:d.type})))
@@ -130,7 +172,7 @@ function createLineChart(data, selector) {
     .style("opacity", 0)
     .attr("fill", d => TYPE_COLORS[d.type] || "#888");
 
-  // MERGE + animate circles like scatterplot
+  // MERGE + animate circles
   const groupsMerge = groupsEnter.merge(groups);
 
   groupsMerge.selectAll("circle")
@@ -143,17 +185,44 @@ function createLineChart(data, selector) {
     .style("opacity", 1)
     .attr("fill", d => TYPE_COLORS[d.type] || "#888");
 
-  // --- Tooltips ---
-  function updateSlopeTooltips() {
-    groupsMerge.selectAll("circle title").text(d => {
-      const keep = !selectedCard ||
-        (d.name===selectedCard.name && d.serie===selectedCard.serie && d.set===selectedCard.set);
-      return keep ? `${d.name}\nSerie:${d.serie}\nSet:${d.set}\nType:${d.type}\nAvg:${d.avg.toFixed(2)}` : "";
-    });
-  }
-  updateSlopeTooltips();
+  // --- Tooltips for dots ---
+  groupsMerge.selectAll("circle")
+    .style("cursor","pointer")
+    .on("mouseover", function(event,d){
+      // Check selection
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected
 
-  // Keep handles
+      d3.select(this).attr("r", circleRadius*1.5); // highlight dot
+      const types = d.type ? d.type.split(",").map(t=>t.trim()):[];
+      const iconsHTML = types.map(t=>TYPE_ICONS[t]?`<img src="${TYPE_ICONS[t]}" alt="${t}" class="type-icon">`:"").join("");
+      slopeTooltip.style("opacity",1)
+        .style("border-color", TYPE_COLORS[types[0]]||"#3b4cca")
+        .html(`
+          <div class="tooltip-header" style="color:${TYPE_COLORS[types[0]]||"#2c3e50"}">
+            ${d.name} ${iconsHTML}
+          </div>
+          <em>Serie:</em> ${d.serie}<br>
+          <em>Set:</em> ${d.set}<br>
+          <em>Type:</em> ${d.type}<br>
+          <em>Condition:</em> ${d.condition}<br>
+          <em>Average Price:</em> $${d.avg.toFixed(2)}
+        `);
+    })
+    .on("mousemove", function(event,d){
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected
+      slopeTooltip.style("left",(event.pageX+15)+"px").style("top",(event.pageY-28)+"px");
+    })
+    .on("mouseout", function(event,d){
+      const key = `${d.name}|${d.serie}|${d.set}`;
+      if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected
+      d3.select(this).attr("r", circleRadius); // reset
+      slopeTooltip.transition().duration(500).style("opacity",0);
+    });
+
+
+  // --- Keep handles ---
   window.slopeLines = groupsMerge.nodes().map((node,i) => ({
     name: data[i].name,
     serie: data[i].serie,
