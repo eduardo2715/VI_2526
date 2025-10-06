@@ -219,7 +219,7 @@ function createLineChart(data, selector) {
       const key = `${d.name}|${d.serie}|${d.set}`;
       if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected
       d3.select(this).attr("r", circleRadius); // reset
-      slopeTooltip.transition().duration(500).style("opacity",0);
+      slopeTooltip.style("opacity",0);
     });
 
 

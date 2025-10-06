@@ -183,6 +183,6 @@ function createBarchart(data, selector) {
   });
 
   g.on("mouseleave", function() {
-    tooltip.transition().duration(200).style("opacity", 0);
+    tooltip.style("opacity", 0);
   });
 }

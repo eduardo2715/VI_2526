@@ -118,7 +118,7 @@ function updateScatterplot(aggregated, selector){
       scatterTooltip.style("left",(event.pageX+15)+"px").style("top",(event.pageY-28)+"px");
     })
     .on("mouseout",function(){
-      scatterTooltip.transition().duration(500).style("opacity",0);
+      scatterTooltip.style("opacity",0);
     })
     .on("click", function(event, d) {
       const key = `${d.name}|${d.serie}|${d.set}`;

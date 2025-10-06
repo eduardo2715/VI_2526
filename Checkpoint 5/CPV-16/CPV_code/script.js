@@ -259,20 +259,24 @@ function init(){
   setupFilterSearch();
 
   d3.csv("./data/dataset.csv").then(rawData=>{
-    // Precompute tables
+
+    // --- SCATTERPLOT DATA ---
+    const normalize = s => s ? s.trim().replace(/\s+/g, " ") : s;
+
     const scatterGrouped = d3.rollup(
       rawData,
       rows => {
-        const totalCount = d3.sum(rows, r => +r.count);
-        const totalRevenue = d3.sum(rows, r => (+r.count) * (+r.avg));
-        const type = rows[0].types;
-        const releaseYear = +rows[0].release_year;
+        const totalCount = d3.sum(rows, r => isNaN(+r.count) ? 0 : +r.count);
+        const totalRevenue = d3.sum(rows, r => isNaN(+r.avg) ? 0 : (+r.count) * (+r.avg));
+        const type = d3.mode(rows.map(r => r.types).filter(Boolean));
+        const releaseYear = d3.mode(rows.map(r => +r.release_year).filter(y => !isNaN(y)));
         return { count: totalCount, revenue: totalRevenue, type, releaseYear };
       },
-      d => d.name,
-      d => d.serie_name,
-      d => d.set_name
+      d => normalize(d.name),
+      d => normalize(d.serie_name),
+      d => normalize(d.set_name)
     );
+
 
     let scatterTable = [];
     scatterGrouped.forEach((bySerie, name) => {
@@ -291,7 +295,10 @@ function init(){
     scatterTable.sort((a,b)=>d3.descending(a.count,b.count));
     scatterTable.forEach((d,i)=>d.rank=i+1);
 
-    // Line chart
+    console.log([...new Set(rawData.map(d => d.name))].filter(n => n.includes("Houndoom") || n.includes("Magcargo")));
+
+
+    // --- LINE CHART DATA ---
     const conditionOrder = ["mint","nearmint","excellent","good","lightplayed","played","poor"];
     const normalizeCondition = cond => {
       if (!cond) return null;
@@ -330,10 +337,58 @@ function init(){
       }
     }
 
+    // --- VIOLIN PLOT DATA ---
+
+    const rarityOrder = [
+      "Common","Uncommon","Rare","Holo Rare","Holo Rare V","Holo Rare VMAX",
+      "Holo Rare VSTAR","Radiant Rare","Amazing Rare","Ultra Rare","Secret Rare"
+    ];
+
+    // Pre-index to avoid O(n²) lookups
+    const cardIndex = new Map(
+      rawData.map(d => [
+        `${d.name}|${d.serie_name}|${d.set_name}`,
+        { type: d.types, releaseYear: +d.release_year, rarity: d.rarity }
+      ])
+    );
+
+    // Compute mean avg per card
+    const cardMeans = d3.rollup(
+      rawData,
+      rows => d3.mean(rows, r => +r.avg),
+      d => d.name,
+      d => d.serie_name,
+      d => d.set_name
+    );
+
+    // Flatten to array
+    let violinTable = [];
+    cardMeans.forEach((bySerie, name) => {
+      bySerie.forEach((bySet, serie) => {
+        bySet.forEach((avgPrice, set) => {
+          const key = `${name}|${serie}|${set}`;
+          const meta = cardIndex.get(key);
+          if (!meta || !rarityOrder.includes(meta.rarity)) return;
+
+          violinTable.push({
+            name,
+            serie,
+            set,
+            rarity: meta.rarity,
+            avgPrice,
+            type: meta.type,
+            releaseYear: meta.releaseYear
+          });
+        });
+      });
+    });
+
+
+    window.violinTable = violinTable;
     window.scatterTable = scatterTable;
     window.lineTable = lineTable;
 
-    // Filtering + charts
+    // --- FILTERING + CHART UPDATES ---
     window.updateCharts = function(){
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
@@ -354,13 +409,21 @@ function init(){
         (selectedTypes.length===0 || selectedTypes.includes(d.type))
       );
 
-      if(filteredScatter.length===0 && filteredLine.length===0){
+      const filteredViolin = violinTable.filter(d =>
+        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
+        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
+        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+      );
+
+      d3.selectAll(".no-data-msg").transition().duration(300).style("opacity",0).remove();
+
+      if(filteredScatter.length===0 && filteredLine.length===0 && filteredViolin.length===0){
         d3.selectAll(".slider-container").style("display","none");
 
         [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
           const container = d3.select(sel);
-          container.selectAll("circle, rect, line, .P_axis text").transition().duration(500).style("opacity",0).remove();
-          container.selectAll(".no-data-msg").remove();
+          container.selectAll("circle, rect, line, .P_axis text, .violin").transition().duration(500).style("opacity",0).remove();
           container.append("div")
             .attr("class","no-data-msg")
             .style("display","flex")
@@ -380,16 +443,18 @@ function init(){
       }
 
       d3.selectAll(".slider-container").style("display","flex");
-      d3.selectAll(".no-data-msg").transition().duration(300).style("opacity",0).remove();
 
+      // --- Update charts ---
       updateScatterplot(filteredScatter, ".ScatterPlot");
       createLineChart(filteredLine, ".LineChart");
+      createViolinPlot(filteredViolin, ".ViolinPlot");
       createBarchart(filteredScatter, ".BarChart");
-      createViolinPlot(filteredScatter, ".ViolinPlot");
+
     };
 
     setupSelectAllLogic();
     initScatterplot(".ScatterPlot");
+    initViolinPlot(".ViolinPlot")
     updateCharts();
 
     d3.select("#loading-overlay")
