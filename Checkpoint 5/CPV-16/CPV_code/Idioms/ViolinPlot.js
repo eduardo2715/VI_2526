@@ -1,16 +1,12 @@
-// ViolinPlot.js — responsive violin plot with focus/zoom-on-click mode (violins + x-axis labels)
-
 let violinSvg, violinG, violinX, violinY, violinInnerWidth, violinInnerHeight, violinTooltip;
 let violinMargin, violinWidth, violinHeight;
-let violinFocused = null; // currently focused rarity (null = show all)
 
 const smartDollarFormat = d => {
-  if (d < 1) return `$${d3.format(".2f")(d)}`;  // show exact cents
-  if (d < 1000) return `$${d3.format(".2f")(d)}`; // e.g. $3.25
-  if (d < 1_000_000) return `$${d3.format(".2s")(d).replace("k", "K")}`; // $1.2K
-  return `$${d3.format(".2s")(d).replace("M", "M")}`; // $1.2M etc.
+  if (d < 1) return `$${d3.format(".2f")(d)}`;
+  if (d < 1000) return `$${d3.format(".2f")(d)}`;
+  if (d < 1_000_000) return `$${d3.format(".2s")(d).replace("k", "K")}`;
+  return `$${d3.format(".2s")(d).replace("M", "M")}`;
 };
-
 
 function initViolinPlot(selector) {
   const container = document.querySelector(selector);
@@ -31,7 +27,6 @@ function initViolinPlot(selector) {
   violinG = violinSvg.append("g")
     .attr("transform", `translate(${violinMargin.left},${violinMargin.top})`);
 
-  // Title
   violinSvg.append("text")
     .attr("x", violinWidth / 2)
     .attr("y", violinMargin.top / 2)
@@ -39,15 +34,15 @@ function initViolinPlot(selector) {
     .attr("class", "chart-title")
     .text("Average Card Price by Rarity");
 
-  // Axes groups
   violinG.append("g").attr("class", "x-axis")
     .attr("transform", `translate(0,${violinInnerHeight})`);
   violinG.append("g").attr("class", "y-axis");
 
-  // Axis titles
+  const rem4 = 4.05 * rem;
+
   violinG.append("text")
     .attr("x", violinInnerWidth / 2)
-    .attr("y", violinInnerHeight + 4.05 * rem)
+    .attr("y", violinInnerHeight + rem4)
     .attr("text-anchor", "middle")
     .attr("class", "axis-title")
     .text("Rarity");
@@ -61,16 +56,16 @@ function initViolinPlot(selector) {
     .attr("class", "axis-title")
     .text("Average Card Price ($)");
 
-  // Tooltip (shared)
   violinTooltip = d3.select("body").select("#tooltip");
   if (violinTooltip.empty()) {
     violinTooltip = d3.select("body").append("div").attr("id", "tooltip");
   }
 }
 
-function createViolinPlot(data, selector) {
+function createViolinPlot(data, selector, focusedRarity = null) {
   if (!data || data.length === 0) return;
   if (!violinSvg) initViolinPlot(selector);
+  if (violinTooltip) violinTooltip.style("opacity", 0);
 
   const cardAverages = data
     .map(d => ({ rarity: d.rarity, avg: +d.avgPrice }))
@@ -78,22 +73,11 @@ function createViolinPlot(data, selector) {
 
   if (cardAverages.length === 0) return;
 
-  // Group by rarity
-  const grouped = d3.rollup(
-    cardAverages,
-    v => v.map(d => d.avg),
-    d => d.rarity
-  );
+  const grouped = d3.rollup(cardAverages, v => v.map(d => d.avg), d => d.rarity);
 
-  // Focus mode: if one rarity is selected
   let displayGrouped = grouped;
-  if (violinFocused) {
-    const values = grouped.get(violinFocused);
-    if (!values) {
-      violinFocused = null;
-    } else {
-      displayGrouped = new Map([[violinFocused, values]]);
-    }
+  if (focusedRarity && grouped.has(focusedRarity)) {
+    displayGrouped = new Map([[focusedRarity, grouped.get(focusedRarity)]]);
   }
 
   const rarities = Array.from(displayGrouped.keys());
@@ -110,43 +94,35 @@ function createViolinPlot(data, selector) {
     .nice()
     .range([violinInnerHeight, 0]);
 
-  // --- X Axis (with clickable + hover highlight labels) ---
   const xAxis = d3.axisBottom(violinX);
-
-  violinG.select(".x-axis")
-    .transition().duration(400)
-    .call(xAxis);
+  violinG.select(".x-axis").transition().duration(400).call(xAxis);
 
   violinG.select(".x-axis").selectAll("text")
-    .style("cursor", "pointer")
+    .attr("data-rarity", d => d)
     .attr("transform", "rotate(-30)")
-    .style("text-anchor", "end")
-    .style("font-weight", d => (violinFocused === d ? "bold" : "normal"))
-    .style("fill", d => (violinFocused === d ? "#008080" : "#000"))
-    .on("mouseover", function () {
-      d3.select(this).style("fill", "#008080").style("font-weight", "bold");
+    .attr("text-anchor", "end")
+    .style("cursor", "pointer")
+    .style("pointer-events", "all")
+    .style("user-select", "none")
+    .style("font-weight", d => (focusedRarity === d ? "bold" : "normal"))
+    .style("fill", d => (focusedRarity === d ? "#008080" : "#000"))
+    .on("mouseover", function(event, d) {
+      d3.select(this)
+        .style("font-weight", "bold")
+        .style("fill", "#008080");
     })
-    .on("mouseout", function (event, rarity) {
-      if (violinFocused !== rarity) {
-        d3.select(this).style("fill", "#000").style("font-weight", "normal");
-      }
-    })
-    .on("click", function (event, rarity) {
-      event.stopPropagation();
-      violinFocused = (violinFocused === rarity) ? null : rarity;
-      createViolinPlot(data, selector);
-      violinTooltip.style("opacity", 0)
+    .on("mouseout", function(event, d) {
+      d3.select(this)
+        .style("font-weight", focusedRarity === d ? "bold" : "normal")
+        .style("fill", focusedRarity === d ? "#008080" : "#000");
     });
 
-  // --- Y Axis ---
   violinG.select(".y-axis")
     .transition().duration(400)
     .call(d3.axisLeft(violinY).tickFormat(smartDollarFormat));
 
-  // Remove old shapes
   violinG.selectAll(".violin, .violin-dot, .box, .x-guide").remove();
 
-  // Kernel helpers
   function kernelEpanechnikov(k) {
     return v => Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
   }
@@ -154,7 +130,6 @@ function createViolinPlot(data, selector) {
     return V => X.map(x => [x, d3.mean(V, v => kernel(x - v))]);
   }
 
-  const formatPrice = d3.format("$.2s");
   const maxWidth = violinX.bandwidth() / 2;
 
   displayGrouped.forEach((values, rarity) => {
@@ -165,66 +140,74 @@ function createViolinPlot(data, selector) {
     const min = d3.min(cleanValues);
     const max = d3.max(cleanValues);
 
+    // === Handle single-point data ===
     if (min === max) {
       const center = violinX(rarity) + violinX.bandwidth() / 2;
+
+      violinG.append("line")
+        .attr("class", "x-guide")
+        .attr("x1", center)
+        .attr("x2", center)
+        .attr("y1", 0)
+        .attr("y2", violinInnerHeight)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "3");
+
       violinG.append("circle")
         .attr("class", "violin-dot")
+        .attr("data-rarity", rarity)
         .attr("cx", center)
         .attr("cy", violinY(min))
         .attr("r", Math.max(4, maxWidth * 0.12))
         .attr("fill", "#69b3a2")
         .attr("stroke", "#000")
         .attr("stroke-width", 0.8)
-        .attr("opacity", 0.9)
-        .style("cursor", "pointer")
-        .on("mouseover", () => {
-          violinTooltip.style("opacity", 1).html(`
-            <div class="tooltip-header">${rarity}</div>
-            <em>Value:</em> ${formatPrice(min)}<br>
-            <em>Cards:</em> ${cleanValues.length}
-          `);
-        })
-        .on("mousemove", function (event) {
-          positionTooltip(event, violinTooltip);
-        })
-        .on("mouseout", () => violinTooltip.style("opacity", 0))
-        .on("click", function (event) {
-          event.stopPropagation();
-          violinFocused = violinFocused === rarity ? null : rarity;
-          createViolinPlot(data, selector);
-          violinTooltip.style("opacity", 0)
-        });
+        .attr("opacity", 0.9);
+
+      violinG.append("circle")
+        .attr("class", "violin-dot")
+        .attr("data-rarity", rarity)
+        .attr("cx", center)
+        .attr("cy", violinY(min))
+        .attr("r", Math.max(1, maxWidth * 0.02))
+        .attr("fill", "#000")
+        .attr("stroke", "#000")
+        .attr("stroke-width", 0.8)
+        .attr("opacity", 0.9);
+
+      // Tooltip for dot
+      bindTooltipEvents(rarity, cleanValues);
       return;
     }
 
-    // higher resolution when focused
-    const nSamples = violinFocused ? 200 : 50;
+    // === Density calculation ===
+    const nSamples = focusedRarity ? 200 : 50;
     const step = (max - min) / nSamples;
     const xGrid = d3.range(min, max + step / 2, step);
-
     const range = max - min;
-    const bandwidth = violinFocused
+    const bandwidth = focusedRarity
       ? Math.max(range / Math.max(20, Math.sqrt(cleanValues.length * 2)), range * 0.02)
       : Math.max(range / Math.max(8, Math.sqrt(cleanValues.length)), range * 0.04);
 
     const kde = kernelDensityEstimator(kernelEpanechnikov(bandwidth), xGrid);
     let density = kde(cleanValues);
-
     if (density[0][0] > min) density.unshift([min, 0]);
     if (density[density.length - 1][0] < max) density.push([max, 0]);
     density[0][1] = 0;
     density[density.length - 1][1] = 0;
 
     const maxDensity = d3.max(density, d => d[1]) || 1;
-    const scale = d3.scaleLinear()
-      .domain([0, maxDensity])
-      .range([0, maxWidth]);
-
+    const scale = d3.scaleLinear().domain([0, maxDensity]).range([0, maxWidth]);
     const center = violinX(rarity) + violinX.bandwidth() / 2;
-
     const rightSide = density.map(d => [center + scale(d[1]), violinY(d[0])]);
     const leftSide = density.slice().reverse().map(d => [center - scale(d[1]), violinY(d[0])]);
     const pathData = [...rightSide, ...leftSide];
+
+    const q1 = d3.quantile(cleanValues, 0.25);
+    const median = d3.quantile(cleanValues, 0.5);
+    const q3 = d3.quantile(cleanValues, 0.75);
+
 
     violinG.append("line")
       .attr("class", "x-guide")
@@ -236,45 +219,20 @@ function createViolinPlot(data, selector) {
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "3");
 
-    const q1 = d3.quantile(cleanValues, 0.25);
-    const median = d3.quantile(cleanValues, 0.5);
-    const q3 = d3.quantile(cleanValues, 0.75);
-
-    const tooltipHTML = `
-      <div class="tooltip-header">${rarity}</div>
-      <em>Min:</em> ${formatPrice(min)}<br>
-      <em>Q1:</em> ${formatPrice(q1)}<br>
-      <em>Median:</em> ${formatPrice(median)}<br>
-      <em>Q3:</em> ${formatPrice(q3)}<br>
-      <em>Max:</em> ${formatPrice(max)}<br>
-      <em>Cards:</em> ${cleanValues.length}
-    `;
-
+    // === Violin shape ===
     violinG.append("path")
-      .style("cursor", "pointer")
       .attr("class", "violin")
       .attr("d", d3.line()(pathData))
       .attr("fill", "#69b3a2")
       .attr("stroke", "#000")
       .attr("stroke-width", 0.8)
-      .attr("opacity", violinFocused ? 0.8 : 0.62)
-      .on("mouseover", function () {
-        violinTooltip.style("opacity", 1).html(tooltipHTML);
-      })
-      .on("mousemove", function (event) {
-        positionTooltip(event, violinTooltip);
-      })
-      .on("mouseout", () => violinTooltip.style("opacity", 0))
-      .on("click", function (event) {
-        event.stopPropagation();
-        violinFocused = violinFocused === rarity ? null : rarity;
-        createViolinPlot(data, selector);
-        violinTooltip.style("opacity", 0)
-      });
+      .attr("opacity", focusedRarity ? 0.8 : 0.62)
+      .attr("data-rarity", rarity)
+      .style("cursor", "pointer");
 
+    // === Box plot overlay ===
     const boxWidth = maxWidth * 0.5;
     violinG.append("rect")
-      .style("cursor", "pointer")
       .attr("class", "box")
       .attr("x", center - boxWidth / 2)
       .attr("y", violinY(q3))
@@ -283,19 +241,8 @@ function createViolinPlot(data, selector) {
       .attr("fill", "#fff")
       .attr("stroke", "#000")
       .attr("stroke-width", 1)
-      .on("mouseover", function () {
-        violinTooltip.style("opacity", 1).html(tooltipHTML);
-      })
-      .on("mousemove", function (event) {
-        positionTooltip(event, violinTooltip);
-      })
-      .on("mouseout", () => violinTooltip.style("opacity", 0))
-      .on("click", function (event) {
-        event.stopPropagation();
-        violinFocused = violinFocused === rarity ? null : rarity;
-        createViolinPlot(data, selector);
-        violinTooltip.style("opacity", 0)
-      });
+      .attr("data-rarity", rarity)
+      .style("cursor", "pointer");
 
     violinG.append("line")
       .attr("class", "box")
@@ -304,34 +251,82 @@ function createViolinPlot(data, selector) {
       .attr("y1", violinY(median))
       .attr("y2", violinY(median))
       .attr("stroke", "#000")
-      .attr("stroke-width", 2);
+      .attr("stroke-width", 2)
+      .attr("data-rarity", rarity)
+      .style("cursor", "pointer");
+
+    // === Tooltip for all elements ===
+    bindTooltipEvents(rarity, cleanValues);
   });
-}
 
-// Shared tooltip positioning helper
-function positionTooltip(event, tooltip) {
-  const node = tooltip.node();
-  if (!node) return;
-  const tw = node.offsetWidth;
-  const th = node.offsetHeight;
-  const pw = window.innerWidth;
-  const ph = window.innerHeight;
+  // === Tooltip Binding Function ===
+  function bindTooltipEvents(rarity, values) {
+    const showTooltip = (event) => {
+      const q1 = d3.quantile(values, 0.25);
+      const median = d3.quantile(values, 0.5);
+      const q3 = d3.quantile(values, 0.75);
+      const avg = d3.mean(values);
+      const min = d3.min(values);
+      const max = d3.max(values);
 
-  let left = event.pageX + 15;
-  let top = event.pageY - 28;
+      const tooltipHTML = `
+        <div class="tooltip-header">${rarity}</div>
+        <div><strong>Min:</strong> ${smartDollarFormat(min)}</div>
+        <div><strong>Q1:</strong> ${smartDollarFormat(q1)}</div>
+        <div><strong>Median:</strong> ${smartDollarFormat(median)}</div>
+        <div><strong>Q3:</strong> ${smartDollarFormat(q3)}</div>
+        <div><strong>Max:</strong> ${smartDollarFormat(max)}</div>
+        <div><strong>Avg:</strong> ${smartDollarFormat(avg)}</div>
+        <div><strong>Nº of Cards:</strong> ${values.length}</div>
+      `;
 
-  if (left + tw > pw - 10) left = event.pageX - tw - 15;
-  if (top + th > ph - 10) top = event.pageY - th - 15;
+      violinTooltip.html(tooltipHTML)
+        .style("opacity", 1)
+        .style("left", `${event.pageX + 12}px`)
+        .style("top", `${event.pageY - 28}px`);
 
-  tooltip.style("left", `${left}px`).style("top", `${top}px`);
-}
+      d3.selectAll(`[data-rarity='${rarity}']`)
+        .transition().duration(100)
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.95);
+    };
 
-// Click outside to reset focus
-document.addEventListener("click", function (event) {
-  const clickedViolin = event.target.closest(".violin, .violin-dot, .box");
-  const clickedLabel = event.target.closest(".x-axis text");
-  if (!clickedViolin && !clickedLabel && violinFocused) {
-    violinFocused = null;
-    if (window.violinTable) createViolinPlot(window.violinTable, ".ViolinPlot");
+    const moveTooltip = (event) => {
+      const tooltipNode = violinTooltip.node();
+      const tw = tooltipNode.offsetWidth;
+      const th = tooltipNode.offsetHeight;
+      const pw = window.innerWidth;
+      const ph = window.innerHeight;
+
+      let left = event.pageX + 15;
+      let top = event.pageY - 28;
+
+      // Flip horizontally if near right edge
+      if (left + tw > pw - 10) {
+        left = event.pageX - tw - 15;
+      }
+
+      // Flip vertically if near bottom edge
+      if (top + th > ph - 10) {
+        top = event.pageY - th - 15;
+      }
+
+      violinTooltip
+        .style("left", `${left}px`)
+        .style("top", `${top}px`);
+    };
+
+    const hideTooltip = () => {
+      violinTooltip.style("opacity", 0);
+      d3.selectAll(`[data-rarity='${rarity}']`)
+        .transition().duration(200)
+        .attr("stroke-width", 0.8)
+        .attr("opacity", 0.7);
+    };
+
+    violinG.selectAll(`[data-rarity='${rarity}']`)
+      .on("mouseover", showTooltip)
+      .on("mousemove", moveTooltip)
+      .on("mouseout", hideTooltip);
   }
-});
+}

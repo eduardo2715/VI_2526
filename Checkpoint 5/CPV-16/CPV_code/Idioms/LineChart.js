@@ -181,7 +181,7 @@ function createLineChart(data, selector) {
 
     d3.select(this).select("path.slope-line")
       .attr("stroke-width", 0.125*rem); // reset stroke
-    slopeTooltip.transition().duration(500).style("opacity",0); // hide tooltip
+    slopeTooltip.style("opacity",0); // hide tooltip
   });
 
 

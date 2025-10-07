@@ -36,6 +36,8 @@ const TYPES = [
 
 // Instead of single object → now supports multiple
 let selectedCards = [];
+let violinFocused = null;
+window.filteredViolin = [];
 
 // Pokémon type icons
 const TYPE_ICONS = {
@@ -208,8 +210,11 @@ function updateSelectionAcrossPlots() {
 
 const infoMessages = [
   "You can select multiple filters from each filter group.",
+  "Use the search boxes above each filter list to quickly find items.",
+  "Click the 'Select All' checkbox to toggle all filters in a group.",
   "Click on a Pokémon to select it, or Ctrl/Cmd + Click to select multiple Pokémon.",
   "Selected Pokémon will be highlighted across all charts.",
+  "Click on a rarity violin/rarity label to zoom on that violin",
   "Hover over bars, points, or lines to see detailed info."
 ];
 
@@ -415,7 +420,9 @@ function init(){
         (selectedSets.length===0 || selectedSets.includes(d.set)) &&
         (selectedTypes.length===0 || selectedTypes.includes(d.type))
       );
-
+      
+      window.filteredViolin = filteredViolin;
+    
       d3.selectAll(".no-data-msg").transition().duration(300).style("opacity",0).remove();
 
       if(filteredScatter.length===0 && filteredLine.length===0 && filteredViolin.length===0){
@@ -447,7 +454,7 @@ function init(){
       // --- Update charts ---
       updateScatterplot(filteredScatter, ".ScatterPlot");
       createLineChart(filteredLine, ".LineChart");
-      createViolinPlot(filteredViolin, ".ViolinPlot");
+      createViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
       createBarchart(filteredScatter, ".BarChart");
 
     };
@@ -469,11 +476,34 @@ function init(){
 document.addEventListener("click", function(event){
   const isPokemonClick = event.target.closest("circle, .bar, .slope-line");
   const isSliderClick = event.target.closest("input[type=range], .slider, .slider-btn");
+  const container = document.querySelector(".ViolinPlot");
+  const clickedElement = event.target.closest(".violin, .box, .x-axis text, .violin-dot");
 
   if(!isPokemonClick && !isSliderClick && selectedCards.length > 0){
     selectedCards = [];
     updateSelectionAcrossPlots();
   }
+
+
+  // 1️⃣ Clicked a violin, box, label or dot → toggle focus
+  if (clickedElement) {
+    const rarity = clickedElement.getAttribute("data-rarity");
+    if (!rarity) return;
+
+    violinFocused = (violinFocused === rarity) ? null : rarity;
+    createViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
+    return;
+  }
+
+  // 2️⃣ Clicked anywhere else (outside) → reset focus
+  if (violinFocused) {
+    if ((container && container.contains(event.target) && !clickedElement) ||
+        (container && !container.contains(event.target))) {
+      violinFocused = null;
+      createViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
+    }
+  }
 });
+
 
 init();
