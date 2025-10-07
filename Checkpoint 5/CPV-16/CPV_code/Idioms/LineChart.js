@@ -131,12 +131,35 @@ function createLineChart(data, selector) {
           <em>Prices:</em> ${d.values.map(v=>"$"+v.avg.toFixed(2)).join(", ")}
         `);
     })
-    .on("mousemove", function(event,d){
+    .on("mousemove", function(event, d) {
       const key = `${d.name}|${d.serie}|${d.set}`;
-      if (selectedCards.length > 0 && !selectedCards.includes(key)) return;
+      if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected
 
-      slopeTooltip.style("left",(event.pageX+15)+"px").style("top",(event.pageY-28)+"px");
+      // --- Smart tooltip positioning ---
+      const node = slopeTooltip.node();
+      const tw = node.offsetWidth;
+      const th = node.offsetHeight;
+      const pw = window.innerWidth;
+      const ph = window.innerHeight;
+
+      let left = event.pageX + 15;
+      let top = event.pageY - 28;
+
+      // Flip horizontally if tooltip would overflow right edge
+      if (left + tw > pw - 10) {
+        left = event.pageX - tw - 15;
+      }
+
+      // Flip vertically if tooltip would overflow bottom edge
+      if (top + th > ph - 10) {
+        top = event.pageY - th - 15;
+      }
+
+      slopeTooltip
+        .style("left", `${left}px`)
+        .style("top", `${top}px`);
     })
+
     .on("click", (event,d) => {
       const key = `${d.name}|${d.serie}|${d.set}`;
       if (event.ctrlKey || event.metaKey) {
@@ -210,11 +233,35 @@ function createLineChart(data, selector) {
           <em>Average Price:</em> $${d.avg.toFixed(2)}
         `);
     })
-    .on("mousemove", function(event,d){
+    .on("mousemove", function(event, d) {
       const key = `${d.name}|${d.serie}|${d.set}`;
       if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected
-      slopeTooltip.style("left",(event.pageX+15)+"px").style("top",(event.pageY-28)+"px");
+
+      // --- Smart positioning logic ---
+      const tooltipNode = slopeTooltip.node();
+      const tw = tooltipNode.offsetWidth;
+      const th = tooltipNode.offsetHeight;
+      const pw = window.innerWidth;
+      const ph = window.innerHeight;
+
+      let left = event.pageX + 15;
+      let top = event.pageY - 28;
+
+      // Flip horizontally if near right edge
+      if (left + tw > pw - 10) {
+        left = event.pageX - tw - 15;
+      }
+
+      // Flip vertically if near bottom edge
+      if (top + th > ph - 10) {
+        top = event.pageY - th - 15;
+      }
+
+      slopeTooltip
+        .style("left", `${left}px`)
+        .style("top", `${top}px`);
     })
+
     .on("mouseout", function(event,d){
       const key = `${d.name}|${d.serie}|${d.set}`;
       if (selectedCards.length > 0 && !selectedCards.includes(key)) return; // skip if not selected

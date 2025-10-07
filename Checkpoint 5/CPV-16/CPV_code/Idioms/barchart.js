@@ -148,7 +148,7 @@ function createBarchart(data, selector) {
     .style("opacity", 1)
     .attr("width", d => x(d.count));
 
-  // --- Flicker-free tooltip ---
+  // --- Flicker-free + smart-positioned tooltip ---
   g.on("mousemove", function(event) {
     const [mx, my] = d3.pointer(event);
     const hoveredBar = top10.find(d => {
@@ -164,7 +164,8 @@ function createBarchart(data, selector) {
         TYPE_ICONS[t] ? `<img src="${TYPE_ICONS[t]}" alt="${t}" class="type-icon">` : ""
       ).join("");
 
-      tooltip.style("opacity", 1)
+      tooltip
+        .style("opacity", 1)
         .style("border-color", TYPE_COLORS[types[0]] || "#3b4cca")
         .html(`
           <div class="tooltip-header" style="color:${TYPE_COLORS[types[0]] || "#2c3e50"}">
@@ -174,13 +175,36 @@ function createBarchart(data, selector) {
           <em>Set:</em> ${hoveredBar.set}<br>
           <em>Type:</em> ${hoveredBar.type}<br>
           <em>Total Sales:</em> ${hoveredBar.count}
-        `)
-        .style("left", (event.pageX + 15) + "px")
-        .style("top", (event.pageY - 28) + "px");
+        `);
+
+      // --- Smart positioning to prevent cutoff ---
+      const tooltipNode = tooltip.node();
+      const tw = tooltipNode.offsetWidth;
+      const th = tooltipNode.offsetHeight;
+      const pw = window.innerWidth;
+      const ph = window.innerHeight;
+
+      let left = event.pageX + 15;
+      let top = event.pageY - 28;
+
+      // Flip horizontally if tooltip would go off-screen
+      if (left + tw > pw - 10) {
+        left = event.pageX - tw - 15;
+      }
+
+      // Flip vertically if tooltip would go below the viewport
+      if (top + th > ph - 10) {
+        top = event.pageY - th - 15;
+      }
+
+      tooltip
+        .style("left", `${left}px`)
+        .style("top", `${top}px`);
     } else {
       tooltip.transition().duration(200).style("opacity", 0);
     }
   });
+
 
   g.on("mouseleave", function() {
     tooltip.style("opacity", 0);

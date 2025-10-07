@@ -317,17 +317,24 @@ html, body {
 }
 
 /* --- ViolinPlot styling --- */
+/* --- Responsive ViolinPlot scaling --- */
+
 .ViolinPlot {
-  font-size: var(--chart-font-size);
+  width: 100%;
+  height: 100%;
 }
 
-.box {
-  stroke-width: 0.0625rem;
+.ViolinPlot .axis-title {
+  font-size: calc(var(--chart-font-size) + 0.125rem);
+  font-weight: bold;
+  text-anchor: middle;
 }
 
-.median {
-  stroke-width: 0.125rem;
+.ViolinPlot .x-axis text,
+.ViolinPlot .y-axis text {
+  font-size: calc(var(--chart-font-size) - 0.2rem);
 }
+
 
 /* --- Slider container --- */
 .slider-container {
