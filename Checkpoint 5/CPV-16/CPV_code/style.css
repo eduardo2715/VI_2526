@@ -476,6 +476,9 @@ html, body {
   margin-bottom: 0.25rem;
 }
 
+.tooltip-sparkline {
+  display: block;
+}
 
 #tooltip .type-icon {
   width: 1.2em;

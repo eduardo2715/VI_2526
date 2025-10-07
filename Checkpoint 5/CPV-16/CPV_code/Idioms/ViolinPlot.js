@@ -38,7 +38,7 @@ function initViolinPlot(selector) {
     .attr("transform", `translate(0,${violinInnerHeight})`);
   violinG.append("g").attr("class", "y-axis");
 
-  const rem4 = 4.05 * rem;
+  const rem4 = 3.9 * rem;
 
   violinG.append("text")
     .attr("x", violinInnerWidth / 2)
@@ -98,8 +98,9 @@ function createViolinPlot(data, selector, focusedRarity = null) {
   violinG.select(".x-axis").transition().duration(400).call(xAxis);
 
   violinG.select(".x-axis").selectAll("text")
+    .attr("opacity", 1)
     .attr("data-rarity", d => d)
-    .attr("transform", "rotate(-30)")
+    .attr("transform", "rotate(-25)")
     .attr("text-anchor", "end")
     .style("cursor", "pointer")
     .style("pointer-events", "all")
@@ -114,7 +115,8 @@ function createViolinPlot(data, selector, focusedRarity = null) {
     .on("mouseout", function(event, d) {
       d3.select(this)
         .style("font-weight", focusedRarity === d ? "bold" : "normal")
-        .style("fill", focusedRarity === d ? "#008080" : "#000");
+        .style("fill", focusedRarity === d ? "#008080" : "#000")
+        .attr("opacity", 1);
     });
 
   violinG.select(".y-axis")
@@ -177,7 +179,7 @@ function createViolinPlot(data, selector, focusedRarity = null) {
         .attr("opacity", 0.9);
 
       // Tooltip for dot
-      bindTooltipEvents(rarity, cleanValues);
+      bindTooltipEvents(rarity, cleanValues, null);
       return;
     }
 
@@ -226,7 +228,7 @@ function createViolinPlot(data, selector, focusedRarity = null) {
       .attr("fill", "#69b3a2")
       .attr("stroke", "#000")
       .attr("stroke-width", 0.8)
-      .attr("opacity", focusedRarity ? 0.8 : 0.62)
+      .attr("opacity", focusedRarity ? 0.8 : 0.6)
       .attr("data-rarity", rarity)
       .style("cursor", "pointer");
 
@@ -242,7 +244,11 @@ function createViolinPlot(data, selector, focusedRarity = null) {
       .attr("stroke", "#000")
       .attr("stroke-width", 1)
       .attr("data-rarity", rarity)
-      .style("cursor", "pointer");
+      .style("cursor", "pointer")
+      .style("pointer-events", "all") // ensures hover works even on thin rect
+      .attr("opacity", 0.6)
+      .style("pointer-events", "bounding-box"); // ensures stroke counts
+
 
     violinG.append("line")
       .attr("class", "box")
@@ -256,11 +262,11 @@ function createViolinPlot(data, selector, focusedRarity = null) {
       .style("cursor", "pointer");
 
     // === Tooltip for all elements ===
-    bindTooltipEvents(rarity, cleanValues);
+    bindTooltipEvents(rarity, cleanValues, density);
   });
 
   // === Tooltip Binding Function ===
-  function bindTooltipEvents(rarity, values) {
+  function bindTooltipEvents(rarity, values, density) {
     const showTooltip = (event) => {
       const q1 = d3.quantile(values, 0.25);
       const median = d3.quantile(values, 0.5);
@@ -283,7 +289,8 @@ function createViolinPlot(data, selector, focusedRarity = null) {
       violinTooltip.html(tooltipHTML)
         .style("opacity", 1)
         .style("left", `${event.pageX + 12}px`)
-        .style("top", `${event.pageY - 28}px`);
+        .style("top", `${event.pageY - 28}px`)
+        .style("border-color", "#008080");
 
       d3.selectAll(`[data-rarity='${rarity}']`)
         .transition().duration(100)
@@ -301,32 +308,70 @@ function createViolinPlot(data, selector, focusedRarity = null) {
       let left = event.pageX + 15;
       let top = event.pageY - 28;
 
-      // Flip horizontally if near right edge
-      if (left + tw > pw - 10) {
-        left = event.pageX - tw - 15;
+      if (left + tw > pw - 30) left = event.pageX - tw - 15;
+      if (top + th > ph - 30) top = event.pageY - th - 15;
+
+      violinTooltip.style("left", `${left}px`).style("top", `${top}px`);
+
+      violinTooltip.select("svg.tooltip-sparkline").remove();
+
+      if (density){
+        const sparkWidth = 120;
+        const sparkHeight = 40;
+
+        const xScale = d3.scaleLinear()
+          .domain([d3.min(values), d3.max(values)])
+          .range([0, sparkWidth]);
+
+        const yScale = d3.scaleLinear()
+          .domain([0, density ? d3.max(density, d => d[1]) : 1])
+          .range([sparkHeight, 0]);
+
+        const lineGenerator = d3.line()
+          .x(d => xScale(d[0]))
+          .y(d => yScale(d[1] || 0))
+          .curve(d3.curveBasis);
+
+        const sparkSvg = violinTooltip.append("svg")
+          .attr("class", "tooltip-sparkline")
+          .attr("width", sparkWidth)
+          .attr("height", sparkHeight)
+          .style("margin-top", "5px");
+
+        sparkSvg.append("path")
+          .datum(density)
+          .attr("d", lineGenerator)
+          .attr("fill", "#69b3a2")
+          .attr("stroke", "#008080")
+          .attr("stroke-width", 1)
+          .attr("opacity", 0.6);
       }
 
-      // Flip vertically if near bottom edge
-      if (top + th > ph - 10) {
-        top = event.pageY - th - 15;
-      }
-
-      violinTooltip
-        .style("left", `${left}px`)
-        .style("top", `${top}px`);
     };
 
     const hideTooltip = () => {
       violinTooltip.style("opacity", 0);
-      d3.selectAll(`[data-rarity='${rarity}']`)
+
+      // Reset only violin shapes, boxes, and dots — not text labels
+      violinG.selectAll(`.violin[data-rarity='${rarity}'],
+                        .box[data-rarity='${rarity}'],
+                        .violin-dot[data-rarity='${rarity}']`)
         .transition().duration(200)
         .attr("stroke-width", 0.8)
-        .attr("opacity", 0.7);
-    };
+        .style("pointer-events", "bounding-box") // ensures stroke counts
+        .attr("opacity", d => focusedRarity ? (focusedRarity === rarity ? 0.8 : 0.6) : 0.7)
+        .attr("fill", d => {
+          if (d3.select(this).classed("violin")) return "#69b3a2";
+          if (d3.select(this).classed("box")) return "#fff";
+          if (d3.select(this).classed("violin-dot")) return "#69b3a2";
+          return null;
+        });
+};
+
 
     violinG.selectAll(`[data-rarity='${rarity}']`)
-      .on("mouseover", showTooltip)
-      .on("mousemove", moveTooltip)
-      .on("mouseout", hideTooltip);
+      .on("mouseover.tooltip", showTooltip)
+      .on("mousemove.tooltip", moveTooltip)
+      .on("mouseout.tooltip", hideTooltip);
   }
 }

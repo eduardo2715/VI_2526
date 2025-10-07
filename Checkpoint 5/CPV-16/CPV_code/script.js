@@ -484,18 +484,33 @@ document.addEventListener("click", function(event){
     updateSelectionAcrossPlots();
   }
 
-
-  // 1️⃣ Clicked a violin, box, label or dot → toggle focus
+  // Clicked a violin, box, label or dot → toggle focus + update selection
   if (clickedElement) {
     const rarity = clickedElement.getAttribute("data-rarity");
     if (!rarity) return;
 
-    violinFocused = (violinFocused === rarity) ? null : rarity;
+    // Toggle focus
+    if (violinFocused === rarity) {
+      violinFocused = null;
+      selectedCards = []; // clear selection
+    } else {
+      violinFocused = rarity;
+
+      // Filter all cards belonging to this rarity
+      const cardsInRarity = window.filteredViolin
+        .filter(d => d.rarity === rarity)
+        .map(d => `${d.name}|${d.serie}|${d.set}`);
+
+      selectedCards = cardsInRarity;
+    }
+
+    // Update charts + violin focus
     createViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
+    updateSelectionAcrossPlots();
     return;
   }
 
-  // 2️⃣ Clicked anywhere else (outside) → reset focus
+  // Clicked anywhere else (outside) → reset focus
   if (violinFocused) {
     if ((container && container.contains(event.target) && !clickedElement) ||
         (container && !container.contains(event.target))) {
