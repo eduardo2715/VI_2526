@@ -4,6 +4,14 @@ let violinSvg, violinG, violinX, violinY, violinInnerWidth, violinInnerHeight, v
 let violinMargin, violinWidth, violinHeight;
 let violinFocused = null; // currently focused rarity (null = show all)
 
+const smartDollarFormat = d => {
+  if (d < 1) return `$${d3.format(".2f")(d)}`;  // show exact cents
+  if (d < 1000) return `$${d3.format(".2f")(d)}`; // e.g. $3.25
+  if (d < 1_000_000) return `$${d3.format(".2s")(d).replace("k", "K")}`; // $1.2K
+  return `$${d3.format(".2s")(d).replace("M", "M")}`; // $1.2M etc.
+};
+
+
 function initViolinPlot(selector) {
   const container = document.querySelector(selector);
   violinWidth = container.clientWidth;
@@ -133,7 +141,7 @@ function createViolinPlot(data, selector) {
   // --- Y Axis ---
   violinG.select(".y-axis")
     .transition().duration(400)
-    .call(d3.axisLeft(violinY).tickFormat(d3.format("$.2s")));
+    .call(d3.axisLeft(violinY).tickFormat(smartDollarFormat));
 
   // Remove old shapes
   violinG.selectAll(".violin, .violin-dot, .box, .x-guide").remove();
@@ -146,7 +154,7 @@ function createViolinPlot(data, selector) {
     return V => X.map(x => [x, d3.mean(V, v => kernel(x - v))]);
   }
 
-  const formatPrice = d3.format("$");
+  const formatPrice = d3.format("$.2s");
   const maxWidth = violinX.bandwidth() / 2;
 
   displayGrouped.forEach((values, rarity) => {
