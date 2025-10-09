@@ -109,6 +109,7 @@ function createBarchart(data, selector) {
     .attr("width", 0) // start width 0
     .attr("fill", d => TYPE_COLORS[d.type] || "#888")
     .style("cursor", "pointer")
+    .attr("rx", 5)
     .style("opacity", 0);
 
   // --- Attach click events before transition ---
