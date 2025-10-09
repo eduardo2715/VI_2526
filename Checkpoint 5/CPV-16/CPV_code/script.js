@@ -430,7 +430,7 @@ function init(){
 
         [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
           const container = d3.select(sel);
-          container.selectAll("circle, rect, line, .P_axis text, .violin").transition().duration(500).style("opacity",0).remove();
+          container.selectAll("circle, rect, line, .P_axis text, .violin, .bar").transition().duration(500).style("opacity",0).remove();
           container.append("div")
             .attr("class","no-data-msg")
             .style("display","flex")

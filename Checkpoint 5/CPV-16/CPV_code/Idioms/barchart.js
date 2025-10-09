@@ -11,36 +11,20 @@ function createBarchart(data, selector) {
   const innerHeight = height - margin.top - margin.bottom;
 
   // Remove previous SVG
-  const oldSvg = d3.select(selector).select("svg");
+   const oldSvg = d3.select(selector).select("svg");
   if (!data || data.length === 0) {
     oldSvg.selectAll(".bar")
       .transition().duration(500).style("opacity", 0).remove();
 
     d3.select(selector).selectAll(".no-data-msg").remove();
-
-    d3.select(selector).append("div")
-      .attr("class", "no-data-msg")
-      .style("display", "flex")
-      .style("align-items", "center")
-      .style("justify-content", "center")
-      .style("height", "100%")
-      .style("width", "100%")
-      .style("color", "#666")
-      .style("font-size", "1em")
-      .style("text-align", "center")
-      .style("opacity", 0)
-      .text("No data to display for the selected filters.")
-      .transition().duration(500).style("opacity", 1);
-
-    oldSvg.remove();
-    return;
-  }
-
+  } 
+  
   d3.select(selector).selectAll(".no-data-msg")
     .transition().duration(500).style("opacity", 0).remove();
 
   oldSvg.remove();
-
+  
+  
   // Aggregate top 10
   const grouped = d3.rollup(
     data,
