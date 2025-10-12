@@ -150,11 +150,29 @@ function updateLineChart(data, selector) {
 
   const groupsMerge = groupsEnter.merge(groups);
 
-  // Animate dots
-  groupsMerge.selectAll("circle")
+  // --- UPDATE existing lines ---
+  groupsMerge.select("path.slope-line")
     .transition().duration(500)
-    .attr("r", lineCircleRadius)
-    .style("opacity", 1);
+    .attr("d", d => lineGen(d.values))
+    .style("opacity",1);
+
+  groupsMerge.selectAll("circle")
+    .data(d => d.values.map(v => ({ ...v, name:d.name, serie:d.serie, set:d.set, type:d.type })))
+    .join(
+      enter => enter.append("circle")
+        .attr("class","slope-dot")
+        .attr("cx", d=>lineX(d.condition))
+        .attr("cy", d=>lineY(d.avg))
+        .attr("r",0)
+        .attr("fill", d=>TYPE_COLORS[d.type]||"#888")
+        .style("opacity",0)
+        .call(s => s.transition().duration(500).attr("r", lineCircleRadius).style("opacity",1)),
+      update => update.transition().duration(500)
+        .attr("cx", d=>lineX(d.condition))
+        .attr("cy", d=>lineY(d.avg))
+        .style("opacity",1),
+      exit => exit.transition().duration(500).style("opacity",0).remove()
+    );
 
   // --- Keep handles for external highlighting ---
   window.slopeLines = groupsMerge.nodes().map((node, i) => ({

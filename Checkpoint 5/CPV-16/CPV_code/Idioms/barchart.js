@@ -93,7 +93,8 @@ function updateBarchart(data, selector) {
 
   barG.select(".y-axis").transition().duration(500).call(yAxis);
   barG.select(".x-axis").transition().duration(500).call(xAxis);
-
+  barG.selectAll(".P_axis text").transition().duration(500).style("opacity", 1);
+  
   // --- Bars ---
   barRects = barG.selectAll(".bar")
     .data(top10, d => `${d.name}---${d.serie}---${d.set}`);

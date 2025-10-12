@@ -394,7 +394,7 @@ function init(){
     window.lineTable = lineTable;
 
     // --- FILTERING + CHART UPDATES ---
-    window.updateCharts = function(){
+    /* window.updateCharts = function(){
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
       const selectedSets = getCheckedValues("#set-filters");
@@ -430,7 +430,7 @@ function init(){
 
         [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
           const container = d3.select(sel);
-          container.selectAll("circle, rect, line, .P_axis text, .violin, .bar").transition().duration(500).style("opacity",0).remove();
+          container.selectAll("circle, rect, line, .violin, .bar").transition().duration(500).style("opacity",0).remove();
           container.append("div")
             .attr("class","no-data-msg")
             .style("display","flex")
@@ -445,7 +445,10 @@ function init(){
             .text("No data to display for the selected filters.")
             .transition().duration(500)
             .style("opacity",1);
-        });
+            container.selectAll(".P_axis text")
+              .transition().duration(500)
+              .style("opacity", 0);        
+            });
         return;
       }
 
@@ -457,6 +460,87 @@ function init(){
       updateViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
       updateBarchart(filteredScatter, ".BarChart");
 
+    }; */
+    window.updateCharts = function(){
+      const selectedYears = getCheckedValues("#year-filters").map(Number);
+      const selectedSeries = getCheckedValues("#serie-filters");
+      const selectedSets = getCheckedValues("#set-filters");
+      const selectedTypes = getCheckedValues("#type-filters");
+
+      const filteredScatter = scatterTable.filter(d =>
+        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
+        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
+        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+      );
+
+      const filteredLine = lineTable.filter(d =>
+        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
+        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
+        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+      );
+
+      const filteredViolin = violinTable.filter(d =>
+        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
+        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
+        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+      );
+
+      window.filteredViolin = filteredViolin;
+
+      // Remove old no-data messages
+      d3.selectAll(".no-data-msg").transition().duration(300).style("opacity",0).remove();
+
+      if(filteredScatter.length===0 && filteredLine.length===0 && filteredViolin.length===0){
+        d3.selectAll(".slider-container").style("display","none");
+
+        // Hide marks but DO NOT remove <g.slope>
+        d3.selectAll(".ScatterPlot circle, .BarChart .bar, .ViolinPlot .violin")
+          .transition().duration(500)
+          .style("opacity",0)
+          .remove(); // safe to remove because no nested groups
+
+        // Line chart: hide marks but keep groups
+        d3.select(".LineChart").selectAll("g.slope path.slope-line, g.slope circle")
+          .transition().duration(500)
+          .style("opacity",0);
+
+        [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
+          const container = d3.select(sel);
+          container.append("div")
+            .attr("class","no-data-msg")
+            .style("display","flex")
+            .style("align-items","center")
+            .style("justify-content","center")
+            .style("height","100%")
+            .style("width","100%")
+            .style("color","#666")
+            .style("font-size","1em")
+            .style("text-align","center")
+            .style("opacity",0)
+            .text("No data to display for the selected filters.")
+            .transition().duration(500)
+            .style("opacity",1);
+
+          if(sel!== ".LineChart") { // For axes, hide only scatter/bar/violin axes
+            container.selectAll(".P_axis text")
+              .transition().duration(500)
+              .style("opacity", 0);
+          }
+        });
+
+        return;
+      }
+
+      d3.selectAll(".slider-container").style("display","flex");
+
+      // --- Update charts normally ---
+      updateScatterplot(filteredScatter, ".ScatterPlot");
+      updateLineChart(filteredLine, ".LineChart");
+      updateViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
+      updateBarchart(filteredScatter, ".BarChart");
     };
 
     setupSelectAllLogic();
