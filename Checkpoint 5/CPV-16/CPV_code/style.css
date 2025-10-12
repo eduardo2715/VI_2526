@@ -5,7 +5,7 @@
 } */
 
 :root {
-  --chart-font-size: clamp(0.8rem, 0.6vw + 0.3rem, 2.6rem);
+  --chart-font-size: clamp(0.3rem, 0.6vw + 0.3rem, 2.6rem);
   --chart-title-size: clamp(0.7rem, 2vw, 1.5rem);
 }
 

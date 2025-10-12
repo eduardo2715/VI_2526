@@ -460,11 +460,13 @@ function init(){
     };
 
     setupSelectAllLogic();
-    initScatterplot(".ScatterPlot");
-    initViolinPlot(".ViolinPlot")
-    initBarchart(".BarChart")
-    initLineChart(".LineChart")
-    updateCharts();
+    requestAnimationFrame(() => {
+      initScatterplot(".ScatterPlot");
+      initViolinPlot(".ViolinPlot");
+      initBarchart(".BarChart");
+      initLineChart(".LineChart");
+      updateCharts();
+    });
 
     d3.select("#loading-overlay")
       .transition()
@@ -521,14 +523,6 @@ document.addEventListener("click", function(event){
     }
   }
 
-/*   let resizeTimeout;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      updateCharts();
-    }, 300); // wait 300ms after last resize event
-  }); */
 });
-
 
 init();
