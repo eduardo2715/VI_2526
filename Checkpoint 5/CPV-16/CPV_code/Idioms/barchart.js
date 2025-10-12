@@ -72,6 +72,10 @@ function updateBarchart(data, selector) {
 
   const top10 = aggregated.sort((a, b) => d3.descending(a.count, b.count)).slice(0, 10);
 
+  // --- Update chart title dynamically ---
+  barSvg.select(".chart-title")
+    .text(`Top ${top10.length} Sold Cards`);
+
   // --- Scales ---
   barY = d3.scaleBand()
     .domain(top10.map(d => `${d.name}---${d.serie}---${d.set}`))
