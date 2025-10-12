@@ -360,10 +360,11 @@ function updateViolinPlot(data, selector, focusedRarity = null) {
         .attr("stroke-width", 0.8)
         .style("pointer-events", "bounding-box") // ensures stroke counts
         .attr("opacity", d => focusedRarity ? (focusedRarity === rarity ? 0.8 : 0.6) : 0.7)
-        .attr("fill", d => {
-          if (d3.select(this).classed("violin")) return "#69b3a2";
-          if (d3.select(this).classed("box")) return "#fff";
-          if (d3.select(this).classed("violin-dot")) return "#69b3a2";
+        .attr("fill", function() {
+          const el = d3.select(this);
+          if (el.classed("violin")) return "#69b3a2";
+          if (el.classed("box")) return "#fff";
+          if (el.classed("violin-dot")) return "#69b3a2";
           return null;
         });
 };

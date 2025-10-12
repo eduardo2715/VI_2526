@@ -507,7 +507,7 @@ document.addEventListener("click", function(event){
     }
 
     // Update charts + violin focus
-    createViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
+    updateViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
     updateSelectionAcrossPlots();
     return;
   }
@@ -517,7 +517,7 @@ document.addEventListener("click", function(event){
     if ((container && container.contains(event.target) && !clickedElement) ||
         (container && !container.contains(event.target))) {
       violinFocused = null;
-      createViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
+      updateViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
     }
   }
 
