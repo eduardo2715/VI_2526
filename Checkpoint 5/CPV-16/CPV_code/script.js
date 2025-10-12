@@ -453,15 +453,17 @@ function init(){
 
       // --- Update charts ---
       updateScatterplot(filteredScatter, ".ScatterPlot");
-      createLineChart(filteredLine, ".LineChart");
-      createViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
-      createBarchart(filteredScatter, ".BarChart");
+      updateLineChart(filteredLine, ".LineChart");
+      updateViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
+      updateBarchart(filteredScatter, ".BarChart");
 
     };
 
     setupSelectAllLogic();
     initScatterplot(".ScatterPlot");
     initViolinPlot(".ViolinPlot")
+    initBarchart(".BarChart")
+    initLineChart(".LineChart")
     updateCharts();
 
     d3.select("#loading-overlay")
@@ -518,6 +520,14 @@ document.addEventListener("click", function(event){
       createViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
     }
   }
+
+/*   let resizeTimeout;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      updateCharts();
+    }, 300); // wait 300ms after last resize event
+  }); */
 });
 
 

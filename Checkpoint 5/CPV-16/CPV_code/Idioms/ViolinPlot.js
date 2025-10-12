@@ -62,7 +62,7 @@ function initViolinPlot(selector) {
   }
 }
 
-function createViolinPlot(data, selector, focusedRarity = null) {
+function updateViolinPlot(data, selector, focusedRarity = null) {
   if (!data || data.length === 0) return;
   if (!violinSvg) initViolinPlot(selector);
   if (violinTooltip) violinTooltip.style("opacity", 0);
