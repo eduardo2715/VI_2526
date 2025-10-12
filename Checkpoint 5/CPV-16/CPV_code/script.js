@@ -1,15 +1,5 @@
 // script.js
 
-// Import D3.js
-// Assuming D3.js is included in the HTML via a <script> tag
-
-// Import other idioms
-// Assuming these functions are defined in separate files and included in the HTML
-// e.g., <script src="Idioms/scatterplot.js"></script>
-// e.g., <script src="Idioms/barchart.js"></script>
-// e.g., <script src="Idioms/linechart.js"></script>
-// e.g., <script src="Idioms/violinplot.js"></script>
-
 const rem = 16; // 1rem = 16px
 
 // --- Global Variables ---
