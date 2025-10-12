@@ -34,14 +34,14 @@ function initBarchart(selector) {
   barG.append("g").attr("class", "x-axis").attr("transform", `translate(0,${barInnerHeight})`);
 
   barG.append("text")
-    .attr("class", "axis-title x-axis-title")
+    .attr("class", "axis-title")
     .attr("x", barInnerWidth / 2)
     .attr("y", barInnerHeight + 2.5 * rem)
     .attr("text-anchor", "middle")
     .text("Sales Volume");
 
   barG.append("text")
-    .attr("class", "axis-title y-axis-title")
+    .attr("class", "axis-title")
     .attr("x", -barMargin.left + 3 * rem)
     .attr("y", -0.5 * rem)
     .attr("text-anchor", "start")

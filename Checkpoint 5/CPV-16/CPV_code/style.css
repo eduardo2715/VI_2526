@@ -1,10 +1,14 @@
 /* --- Root variable for unified chart fonts and titles --- */
+/* :root {
+  --chart-font-size: 1rem;
+  --chart-title-size: clamp(0.8rem, 2vw + 0.5rem, 1.5rem);
+} */
+
 :root {
-  --chart-font-size: 1rem;               /* Base font for axes and labels */
-  --chart-title-size: clamp(0.8rem, 2vw + 0.5rem, 1.5rem); /* Responsive title */
-  --Bchart-vertical-font-size: 1rem;     /* Bar chart specific font-size */
-  --Bchart-horizontal-font-size: 1rem;
+  --chart-font-size: clamp(0.8rem, 0.6vw + 0.3rem, 2.6rem);
+  --chart-title-size: clamp(0.7rem, 2vw, 1.5rem);
 }
+
 
 /* --- General Reset --- */
 html, body {
@@ -248,22 +252,19 @@ html, body {
 }
 
 /* --- BarChart Titles (axes & labels) --- */
-.BarChart .P_axis text { /* y-axis labels */
-  font-size: var(--Bchart-vertical-font-size);
+.BarChart .y-axis text { /* y-axis labels */
+  font-size: var(--chart-font-size);
   fill: #333;
 }
 
-.BarChart .axis text { 
-  font-size: calc(var(--Bchart-horizontal-font-size) * 0.6);
+.BarChart .x-axis text { /* y-axis labels */
+  font-size: calc(var(--chart-font-size) - 0.3rem);
   fill: #333;
 }
 
 .BarChart .axis-title { 
-  font-size: var(--Bchart-horizontal-font-size);
+  font-size: calc(var(--chart-font-size) + 0.125rem);
   font-weight: bold;
-  fill: #2c3e50;
-  text-anchor: middle;
-  dominant-baseline: middle;
 }
 
 /* --- Chart Titles --- */
@@ -289,12 +290,12 @@ html, body {
 }
 
 .ScatterPlot .x-axis text {
-  font-size: calc(var(--chart-font-size) - 0.125rem);
+  font-size: var(--chart-font-size);
   fill: #333;
 }
 
 .ScatterPlot .y-axis text {
-  font-size: calc(var(--chart-font-size) - 0.125rem);
+  font-size: var(--chart-font-size);
   fill: #333;
 }
 
@@ -321,7 +322,7 @@ html, body {
 
 .LineChart .x-axis text,
 .LineChart .y-axis text {
-  font-size: calc(var(--chart-font-size) - 0.2rem);
+  font-size: var(--chart-font-size);
 }
 
 .LineChart .axis-title {
