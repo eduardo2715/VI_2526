@@ -109,8 +109,8 @@ function createCheckboxes(containerId, items){
 
     label.append("input")
       .attr("type","checkbox")
-      .attr("value",i)
-      .property("checked",false);
+      .attr("value", i)
+      .property("checked", true); // ✅ default selected
 
     label.append("span").text(i);
 
@@ -130,6 +130,7 @@ function createCheckboxes(containerId, items){
   });
 }
 
+
 function getCheckedValues(containerId){
   return Array.from(d3.select(containerId).selectAll("input").nodes())
     .filter(n=>n.checked).map(n=>n.value);
@@ -140,23 +141,30 @@ function setupSelectAllLogic(){
     const selectAllBox = d3.select(this);
     const targetId = selectAllBox.attr("data-target");
 
-    selectAllBox.on("change",function(){
-      const checked=this.checked;
-      d3.select(`#${targetId}`).selectAll("input").property("checked",checked);
+    // Set initial state
+    const allChecked = d3.select(`#${targetId}`).selectAll("input").nodes().every(n => n.checked);
+    selectAllBox.property("checked", allChecked);
+
+    // On Select All change
+    selectAllBox.on("change", function(){
+      const checked = this.checked;
+      d3.select(`#${targetId}`).selectAll("input").property("checked", checked);
       updateCharts();
-      lockFilters()
+      lockFilters();
       updateFilterCounts();
     });
 
-    d3.select(`#${targetId}`).selectAll("input").on("change",function(){
-      const allChecked=d3.select(`#${targetId}`).selectAll("input").nodes().every(n=>n.checked);
-      selectAllBox.property("checked",allChecked);
+    // On individual checkbox change
+    d3.select(`#${targetId}`).selectAll("input").on("change", function(){
+      const allChecked = d3.select(`#${targetId}`).selectAll("input").nodes().every(n => n.checked);
+      selectAllBox.property("checked", allChecked);
       updateCharts();
-      lockFilters()
+      lockFilters();
       updateFilterCounts();
     });
   });
 }
+
 
 // --- Selection Highlighting ---
 function updateSelectionAcrossPlots() {
@@ -261,6 +269,7 @@ function init(){
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
+  updateFilterCounts(); // ✅ ensure counts reflect initial selection
   setupFilterSearch();
 
   d3.csv("./data/dataset.csv").then(rawData=>{
@@ -394,73 +403,6 @@ function init(){
     window.lineTable = lineTable;
 
     // --- FILTERING + CHART UPDATES ---
-    /* window.updateCharts = function(){
-      const selectedYears = getCheckedValues("#year-filters").map(Number);
-      const selectedSeries = getCheckedValues("#serie-filters");
-      const selectedSets = getCheckedValues("#set-filters");
-      const selectedTypes = getCheckedValues("#type-filters");
-
-      const filteredScatter = scatterTable.filter(d =>
-        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.type))
-      );
-
-      const filteredLine = lineTable.filter(d =>
-        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.type))
-      );
-
-      const filteredViolin = violinTable.filter(d =>
-        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.type))
-      );
-      
-      window.filteredViolin = filteredViolin;
-    
-      d3.selectAll(".no-data-msg").transition().duration(300).style("opacity",0).remove();
-
-      if(filteredScatter.length===0 && filteredLine.length===0 && filteredViolin.length===0){
-        d3.selectAll(".slider-container").style("display","none");
-
-        [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
-          const container = d3.select(sel);
-          container.selectAll("circle, rect, line, .violin, .bar").transition().duration(500).style("opacity",0).remove();
-          container.append("div")
-            .attr("class","no-data-msg")
-            .style("display","flex")
-            .style("align-items","center")
-            .style("justify-content","center")
-            .style("height","100%")
-            .style("width","100%")
-            .style("color","#666")
-            .style("font-size","1em")
-            .style("text-align","center")
-            .style("opacity",0)
-            .text("No data to display for the selected filters.")
-            .transition().duration(500)
-            .style("opacity",1);
-            container.selectAll(".P_axis text")
-              .transition().duration(500)
-              .style("opacity", 0);        
-            });
-        return;
-      }
-
-      d3.selectAll(".slider-container").style("display","flex");
-
-      // --- Update charts ---
-      updateScatterplot(filteredScatter, ".ScatterPlot");
-      updateLineChart(filteredLine, ".LineChart");
-      updateViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
-      updateBarchart(filteredScatter, ".BarChart");
-
-    }; */
     window.updateCharts = function(){
       const selectedYears = getCheckedValues("#year-filters").map(Number);
       const selectedSeries = getCheckedValues("#serie-filters");
@@ -468,24 +410,24 @@ function init(){
       const selectedTypes = getCheckedValues("#type-filters");
 
       const filteredScatter = scatterTable.filter(d =>
-        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+        (selectedYears.length>0 && selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length>0 && selectedSeries.includes(d.serie)) &&
+        (selectedSets.length>0 && selectedSets.includes(d.set)) &&
+        (selectedTypes.length>0 && selectedTypes.includes(d.type))
       );
 
       const filteredLine = lineTable.filter(d =>
-        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+        (selectedYears.length>0 && selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length>0 && selectedSeries.includes(d.serie)) &&
+        (selectedSets.length>0 && selectedSets.includes(d.set)) &&
+        (selectedTypes.length>0 && selectedTypes.includes(d.type))
       );
 
       const filteredViolin = violinTable.filter(d =>
-        (selectedYears.length===0 || selectedYears.includes(d.releaseYear)) &&
-        (selectedSeries.length===0 || selectedSeries.includes(d.serie)) &&
-        (selectedSets.length===0 || selectedSets.includes(d.set)) &&
-        (selectedTypes.length===0 || selectedTypes.includes(d.type))
+        (selectedYears.length>0 && selectedYears.includes(d.releaseYear)) &&
+        (selectedSeries.length>0 && selectedSeries.includes(d.serie)) &&
+        (selectedSets.length>0 && selectedSets.includes(d.set)) &&
+        (selectedTypes.length>0 && selectedTypes.includes(d.type))
       );
 
       window.filteredViolin = filteredViolin;
@@ -497,15 +439,19 @@ function init(){
         d3.selectAll(".slider-container").style("display","none");
 
         // Hide marks but DO NOT remove <g.slope>
-        d3.selectAll(".ScatterPlot circle, .BarChart .bar, .ViolinPlot .violin")
+        d3.selectAll(".ScatterPlot circle, .BarChart .bar, .ViolinPlot .violin, .box, .ViolinPlot circle")
           .transition().duration(500)
           .style("opacity",0)
           .remove(); // safe to remove because no nested groups
+        
+        d3.select(".ViolinPlot").selectAll(".x-axis text")
+          .style("pointer-events", "none");
 
         // Line chart: hide marks but keep groups
         d3.select(".LineChart").selectAll("g.slope path.slope-line, g.slope circle")
           .transition().duration(500)
-          .style("opacity",0);
+          .style("opacity",0)
+          .style("pointer-events", "none");
 
         [".ScatterPlot",".BarChart",".LineChart",".ViolinPlot"].forEach(sel=>{
           const container = d3.select(sel);
@@ -541,6 +487,16 @@ function init(){
       updateLineChart(filteredLine, ".LineChart");
       updateViolinPlot(filteredViolin, ".ViolinPlot", violinFocused);
       updateBarchart(filteredScatter, ".BarChart");
+
+
+      // Restore
+      d3.selectAll("g.slope path.slope-line, g.slope circle")
+        .style("pointer-events", "all")
+        .style("opacity", 1);
+
+      d3.select(".ViolinPlot").selectAll(".x-axis text")
+          .style("pointer-events", "all");
+
     };
 
     setupSelectAllLogic();
