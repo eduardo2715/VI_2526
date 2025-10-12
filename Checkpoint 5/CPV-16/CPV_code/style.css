@@ -375,7 +375,7 @@ html, body {
   width: clamp(1em, 3vw, 3em);
 }
 
-.slider-btn {
+/* .slider-btn {
   width: clamp(1rem, 2vw, 2rem);
   height: clamp(1rem, 2vw, 2rem);
   border-radius: 0.9rem;
@@ -389,21 +389,45 @@ html, body {
   border: none;
   box-shadow: 0 0.15em 0.3em rgba(0,0,0,0.3);
   transition: transform 0.2s, box-shadow 0.2s;
+} */
+
+.slider-btn {
+  width: clamp(1.0rem, 2vw, 2rem);
+  height: clamp(1.0rem, 2vw, 2rem);
+  border-radius: 30%;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-weight: 600;
+  color: #1a1a1a;
+  background: #f4f4f4;
+  border: 1.5px solid #d4d4d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 0.1em 0.25em rgba(0, 0, 0, 0.05);
 }
 
 .slider-btn.plus {
   margin-bottom: calc(clamp(1rem, 15vh, 2.5rem));
-  background: linear-gradient(145deg, #6577ff, #a3ff76);
+  /* background: linear-gradient(145deg, #6577ff, #a3ff76); */
 }
 
 .slider-btn.minus {
   margin-top: calc(clamp(1rem, 15vh, 2.5rem));
-  background: linear-gradient(145deg, #fa9349, #ffe066);
+  /* background: linear-gradient(145deg, #fa9349, #ffe066); */
 }
 
-.slider-btn:hover {
+/* .slider-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 0.25em 0.5em rgba(0,0,0,0.35);
+} */
+
+.slider-btn:hover {
+  border-color: #ffcb05;
+  background: #fffbea;
+  transform: scale(1.1);
+  box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.1);
 }
 
 .LineChart-container .slider {
@@ -415,17 +439,9 @@ html, body {
   border-radius: 0.5em;
   margin: 0.5rem;
   border: 0.05em solid #2c2c2c;
-  background: linear-gradient(
-    90deg,
-    #83c761 0%,
-    #f3d456 25%,
-    #ee9658 50%,
-    #8aacfc 75%,
-    #95d377 100%
-  );
 }
 
-.LineChart-container .slider::-moz-range-track {
+/* .LineChart-container .slider::-moz-range-track {
   background: linear-gradient(
     90deg,
     #83c761 0%,
@@ -434,7 +450,8 @@ html, body {
     #8aacfc 75%,
     #95d377 100%
   );
-}
+} */
+
 
 .LineChart-container .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
