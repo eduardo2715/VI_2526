@@ -106,6 +106,7 @@ function updateScatterplot(aggregated, selector){
           <div class="tooltip-header" style="color:${TYPE_COLORS[types[0]]||"#2c3e50"}">
             ${d.name} ${iconsHTML}
           </div>
+          <em>Year:</em> ${d.releaseYear}<br>
           <em>Serie:</em> ${d.serie}<br>
           <em>Set:</em> ${d.set}<br>
           <em>Type:</em> ${d.type}<br>

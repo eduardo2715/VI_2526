@@ -11,7 +11,7 @@ const TYPE_COLORS = {
   "Grass,Metal": "#60a070",
   "Lightning,Metal": "#d0b030",
   "Psychic,Metal": "#e880a0",
-  "Fire,Metal": "#f08078",
+  "Fire,Metal": "#be8b87ff",
   "Fighting,Metal": "#a04030",
   "Water,Metal": "#6080d0",
   "Darkness,Metal": "#604848",
@@ -20,8 +20,8 @@ const TYPE_COLORS = {
   "Lightning,Darkness": "#d0a030",
   "Fighting,Darkness": "#804030",
   "Psychic,Darkness": "#d06080",
-  "Fire,Darkness": "#f08060",
-  "Darkness,Darkness": "#503838",
+  "Fire,Darkness": "#682817ff",
+  "Darkness,Darkness": "#1d1414ff",
   "Metal,Darkness": "#606060",
   "Dragon": "#7038f8"
 };
