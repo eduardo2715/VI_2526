@@ -1,20 +1,5 @@
 # VI
 
-folder structure:
-
-VI_2526/
-└─ Project_code/
-   ├─ index.html
-   ├─ style.css
-   ├─ script.js
-   ├─ data/
-   │  └─ dataset.csv
-   └─ Idioms/
-      ├─ scatterplot.js
-      ├─ barchart.js
-      └─ type_colors.js
-
-
 How to run:
 
 - Open Terminal in Project_Code folder
