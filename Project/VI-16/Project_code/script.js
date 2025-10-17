@@ -54,10 +54,6 @@ function updateProgress(percent, message){
 
   // Update width
   bar.style.width = `${percent}%`;
-
-  // Trigger pulse effect for this step
-  bar.classList.add("pulse");
-  setTimeout(() => bar.classList.remove("pulse"), 600);
 }
 
 
