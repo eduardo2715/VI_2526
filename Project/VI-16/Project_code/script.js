@@ -546,8 +546,8 @@ document.addEventListener("click", function(event){
 
   // Clicked anywhere else (outside) → reset focus
   if (violinFocused) {
-    if ((container && container.contains(event.target) && !clickedElement) ||
-        (container && !container.contains(event.target))) {
+    if ((container && container.contains(event.target) && !clickedElement && !isSliderClick) ||
+        (container && !container.contains(event.target) && !isSliderClick)) {
       violinFocused = null;
       updateViolinPlot(window.filteredViolin, ".ViolinPlot", violinFocused);
     }
