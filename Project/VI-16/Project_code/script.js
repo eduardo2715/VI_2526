@@ -43,6 +43,23 @@ const TYPE_ICONS = {
   "Dragon": "./images/Dragon.png"
 };
 
+function updateProgress(percent, message){
+  const bar = document.getElementById("progress-bar");
+  const text = document.getElementById("progress-text");
+
+  text.textContent = message;
+
+  // Force layout flush to prevent jumping
+  bar.offsetWidth;
+
+  // Update width
+  bar.style.width = `${percent}%`;
+
+  // Trigger pulse effect for this step
+  bar.classList.add("pulse");
+  setTimeout(() => bar.classList.remove("pulse"), 600);
+}
+
 
 //Avoid Filter Spamming
 function lockFilters(duration = 300) {
@@ -218,15 +235,15 @@ const infoMessages = [
 
 // Tooltip div
 const infoTooltip = d3.select("body").append("div")
-  .attr("class", "info-tooltip");
-
-// Pulsing glow animation
-d3.select(".info-icon")
-  .style("animation", "pulse 1.5s infinite")
+  .attr("class", "info-tooltip")
+  .style("position", "absolute")
+  .style("pointer-events", "none")
+d3.selectAll(".info-icon, .info-icon img, .filters-header img[alt='Info']")
   .on("mouseover", function(event) {
     infoTooltip.html(infoMessages.map(msg => `<div>• ${msg}</div>`).join(""))
       .style("left", (event.pageX + 10) + "px")
       .style("top", (event.pageY + 10) + "px")
+      .style("display", "block")
       .style("opacity", 1);
   })
   .on("mousemove", function(event) {
@@ -235,7 +252,7 @@ d3.select(".info-icon")
       .style("top", (event.pageY + 10) + "px");
   })
   .on("mouseout", function() {
-    infoTooltip.style("opacity", 0);
+    infoTooltip.style("opacity", 0).style("display", "none");
   });
 
 // Pulsing keyframes (inject into DOM)
@@ -250,20 +267,32 @@ styleSheet.innerText = `
 document.head.appendChild(styleSheet);
 
 // --- Initialize ---
-function init(){
+async function init(){
 
+  // Show overlay
   d3.select("#loading-overlay").style("display", "flex");
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+  // Step 1: Create filter checkboxes
+  updateProgress(10, "Creating filter checkboxes...");
+  await wait(200);
   createCheckboxes("#year-filters",YEARS);
   createCheckboxes("#serie-filters",SERIES);
   createCheckboxes("#set-filters",SETS);
   createCheckboxes("#type-filters",TYPES);
 
+  updateProgress(20, "Setting up filter search...");
+  await wait(200);
   updateFilterCounts(); // ✅ ensure counts reflect initial selection
   setupFilterSearch();
 
-  d3.csv("./data/dataset.csv").then(rawData=>{
+  updateProgress(30, "Loading CSV data...");
+  await wait(200);
+  d3.csv("./data/dataset.csv").then(async rawData=>{
 
+    updateProgress(50, "Processing scatterplot data...");
+    await wait(200);
+    
     // --- SCATTERPLOT DATA ---
     const normalize = s => s ? s.trim().replace(/\s+/g, " ") : s;
 
@@ -300,8 +329,9 @@ function init(){
     scatterTable.forEach((d,i)=>d.rank=i+1);
 
     console.log([...new Set(rawData.map(d => d.name))].filter(n => n.includes("Houndoom") || n.includes("Magcargo")));
-
-
+    
+    updateProgress(70, "Processing line chart data...");
+    await wait(200);
     // --- LINE CHART DATA ---
     const conditionOrder = ["mint","nearmint","excellent","good","lightplayed","played","poor"];
     const normalizeCondition = cond => {
@@ -341,6 +371,8 @@ function init(){
       }
     }
 
+    updateProgress(85, "Processing violin plot data...");
+    await wait(200);
     // --- VIOLIN PLOT DATA ---
 
     const rarityOrder = [
@@ -489,6 +521,8 @@ function init(){
 
     };
 
+    updateProgress(95, "Initializing charts...");
+    await wait(200);
     setupSelectAllLogic();
     requestAnimationFrame(() => {
       initScatterplot(".ScatterPlot");
@@ -498,11 +532,14 @@ function init(){
       updateCharts();
     });
 
-    d3.select("#loading-overlay")
-      .transition()
-      .duration(2000)
-      .style("opacity", 0)
-      .on("end", () => d3.select("#loading-overlay").style("display", "none"));
+    updateProgress(100, "Charts ready!");
+    await wait(200);
+    setTimeout(() => {
+      d3.select("#loading-overlay")
+        .transition().duration(500)
+        .style("opacity", 0)
+        .on("end", () => d3.select("#loading-overlay").style("display","none"));
+    }, 300);
   });
 }
 

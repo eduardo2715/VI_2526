@@ -258,7 +258,7 @@ html, body {
 }
 
 .BarChart .x-axis text { /* y-axis labels */
-  font-size: calc(var(--chart-font-size) - 0.3rem);
+  font-size: calc(var(--chart-font-size) - 0.15rem);
   fill: #333;
 }
 
@@ -344,9 +344,12 @@ html, body {
   text-anchor: middle;
 }
 
-.ViolinPlot .x-axis text,
-.ViolinPlot .y-axis text {
+.ViolinPlot .x-axis text {
   font-size: calc(var(--chart-font-size) - 0.2vw);
+} 
+
+.ViolinPlot .y-axis text {
+  font-size: calc(var(--chart-font-size) - 0.1vw);
 }
 
 
@@ -522,33 +525,60 @@ html, body {
   pointer-events: none;
 }
 
-/* --- Loading overlay --- */
+/* Overlay covering the whole screen */
 #loading-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(255,255,255,0.85);
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.95);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
-  font-size: 1.2rem;
-  color: #2c3e50;
-  font-weight: bold;
+  z-index: 9999;
+  font-family: "Segoe UI", sans-serif;
 }
 
-/* --- Spinner --- */
-.spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 0.4rem solid #ccc;
-  border-top-color: #3b4cca;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+/* Progress bar container */
+.progress-container {
+  width: 60%;
+  height: 25px;
+  background: #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
+
+/* Progress bar itself */
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #1e90ff, #00bfff);
+  border-radius: 12px 0 0 12px;
+  transition: width 0.5s ease, background 0.5s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* Text showing current step */
+#progress-text {
+  font-size: 1em;
+  color: #333;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  letter-spacing: 0.5px;
+}
+
+/* Subtle pulse animation for each step */
+@keyframes pulse {
+  0% { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  50% { box-shadow: 0 1px 8px rgba(30,144,255,0.7); }
+  100% { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+}
+
+.progress-bar.pulse {
+  animation: pulse 0.6s ease-in-out;
+}
+
+
 
 @keyframes spin {
   to { transform: rotate(360deg); }

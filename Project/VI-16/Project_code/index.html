@@ -10,8 +10,10 @@
 </head>
 <body>
   <div id="loading-overlay">
-    <div class="spinner"></div>
-    <span>Loading charts...</span>
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <span id="progress-text">Loading charts...</span>
   </div>
 
 
@@ -20,8 +22,8 @@
     <div class="filters">
       <h3 class="filters-header">
         Filters
-        <span class="info-icon" title="">
-          ℹ️
+        <span class="info-icon" title="More information"></span>
+          <img src="images/info.png" alt="Info" style="height:1em; width:auto; vertical-align:middle;">
         </span>
       </h3>
       <div class="filter-group tall-filters">

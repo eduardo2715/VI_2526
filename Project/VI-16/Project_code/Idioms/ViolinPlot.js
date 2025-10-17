@@ -71,7 +71,15 @@ function updateViolinPlot(data, selector, focusedRarity = null) {
     displayGrouped = new Map([[focusedRarity, grouped.get(focusedRarity)]]);
   }
 
-  const rarities = Array.from(displayGrouped.keys());
+  const rarityOrder = [
+    "Common", "Uncommon", "Rare", "Holo Rare", "Holo Rare V",
+    "Holo Rare VMAX", "Holo Rare VSTAR", "Radiant Rare",
+    "Amazing Rare", "Ultra Rare", "Secret Rare"
+  ];
+
+  // ✅ Keep only rarities present in the data, in the correct order
+  const rarities = rarityOrder.filter(r => displayGrouped.has(r));
+
   const allValues = Array.from(displayGrouped.values()).flat();
   const globalMax = d3.max(allValues) || 1;
 
