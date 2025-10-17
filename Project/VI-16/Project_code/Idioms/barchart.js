@@ -5,6 +5,60 @@ let barInnerWidth, barInnerHeight;
 let barRects;
 const barMargin = { top: 64, right: 20, bottom: 60, left: 140 }; // using rem-based logic in pixels for simplicity
 
+function wrapAxisText(text, width) {
+  text.each(function() {
+    const textSel = d3.select(this);
+    const words = textSel.text().split(/\s+/).reverse();
+    const anchor = textSel.attr("text-anchor") || "end";
+    const dx = textSel.attr("dx") || "-1.2em";
+    let word, line = [];
+    let lineNumber = 0;
+    const lineHeight = 1;
+    const y = textSel.attr("y");
+    const dy = parseFloat(textSel.attr("dy")) || 0;
+
+    textSel.text(null);
+
+    let tspans = [];
+    let tspan = textSel.append("tspan")
+      .attr("x", 0)
+      .attr("dx", dx)
+      .attr("y", y)
+      .attr("dy", dy + "em");
+
+    while ((word = words.pop())) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspans.push(tspan);
+        tspan = textSel.append("tspan")
+          .attr("x", 0)
+          .attr("dx", dx)
+          .attr("y", y)
+          .attr("dy", ++lineNumber * lineHeight + dy + "em")
+          .text(word);
+      }
+    }
+    tspans.push(tspan);
+
+    // ✅ Center vertically if more than one line
+    if (tspans.length > 1) {
+      const totalHeight = (tspans.length - 1) * lineHeight;
+      const offset = -(totalHeight / 2);
+      tspans.forEach((t, i) => {
+        const currentDy = parseFloat(t.attr("dy")) || 0;
+        t.attr("dy", (currentDy + offset) + "em");
+      });
+    }
+  });
+}
+
+
+
+
 // --- Initialize once ---
 function initBarchart(selector) {
   const container = document.querySelector(selector);
@@ -88,10 +142,24 @@ function updateBarchart(data, selector) {
     .range([0, barInnerWidth]);
 
   // --- Axes ---
-  const yAxis = d3.axisLeft(barY).tickFormat(t => t.split('---')[0]);
+
   const xAxis = d3.axisBottom(barX).ticks(5).tickFormat(d3.format("~s"));
 
-  barG.select(".y-axis").transition().duration(500).call(yAxis);
+  const yAxis = d3.axisLeft(barY)
+  .tickFormat(t => t.split('---')[0])
+  .tickPadding(8); // space between tick line and label
+
+  barG.select(".y-axis")
+    .transition()
+    .duration(500)
+    .call(yAxis)
+    .on("end", () => {
+      barG.selectAll(".y-axis text")
+        .attr("text-anchor", "end")
+        .attr("dx", "-1em") // reliable extra gap
+        .call(wrapAxisText, barMargin.left - 10);
+    });
+
   barG.select(".x-axis").transition().duration(500).call(xAxis);
   barG.selectAll(".P_axis text").transition().duration(500).style("opacity", 1);
   

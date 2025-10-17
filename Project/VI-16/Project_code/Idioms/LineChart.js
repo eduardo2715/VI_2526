@@ -5,6 +5,13 @@ let lineInnerWidth, lineInnerHeight, lineMargin, lineCircleRadius;
 window.slopeLines = [];
 let yAxis, lineGen;
 
+const smartDollarFormat = d => {
+  if (d < 1) return `$${d3.format(".2f")(d)}`;
+  if (d < 1000) return `$${d3.format(".2f")(d)}`;
+  if (d < 1_000_000) return `$${d3.format(".2s")(d).replace("k", "K")}`;
+  return `$${d3.format(".2s")(d).replace("M", "M")}`;
+};
+
 function initLineChart(selector) {
   const container = document.querySelector(selector);
   const width = container.clientWidth;
@@ -103,11 +110,7 @@ function updateLineChart(data, selector) {
     .call(d3.axisBottom(lineX));
 
   yAxis.transition().duration(100)
-    .call(d3.axisLeft(lineY).tickFormat(d => {
-      // Keep one decimal, avoid scientific notation for small numbers
-      if (d < 1) return `$${d}`;
-      if (d >= 1) return `$${d3.format(",.1f")(d)}`;
-    }));
+    .call(d3.axisLeft(lineY).tickFormat(d => smartDollarFormat(d)));
 
   // --- Line generator ---
   lineGen = d3.line()
@@ -289,13 +292,7 @@ function setupLineZoom(data, groupsMerge, maxY) {
     const yMax = yMin + visibleMax;
 
     lineY.domain([yMin, yMax]).nice();
-    yAxis.transition().duration(100)
-    .call(d3.axisLeft(lineY).tickFormat(d => {
-      // Keep one decimal, avoid scientific notation for small numbers
-      if (d < 1) return `$${d}`;
-      if (d >= 1) return `$${d3.format(",.1f")(d)}`;
-    }));
-
+    yAxis.transition().duration(100).call(d3.axisLeft(lineY).tickFormat(d => smartDollarFormat(d)));
     groupsMerge.select("path.slope-line").attr("d", d => lineGen(d.values));
     groupsMerge.selectAll("circle").attr("cy", d => lineY(d.avg));
   }

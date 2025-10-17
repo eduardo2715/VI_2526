@@ -1,13 +1,6 @@
 let violinSvg, violinG, violinX, violinY, violinInnerWidth, violinInnerHeight, violinTooltip;
 let violinMargin, violinWidth, violinHeight;
 
-const smartDollarFormat = d => {
-  if (d < 1) return `$${d3.format(".2f")(d)}`;
-  if (d < 1000) return `$${d3.format(".2f")(d)}`;
-  if (d < 1_000_000) return `$${d3.format(".2s")(d).replace("k", "K")}`;
-  return `$${d3.format(".2s")(d).replace("M", "M")}`;
-};
-
 function initViolinPlot(selector) {
   const container = document.querySelector(selector);
   violinWidth = container.clientWidth;
