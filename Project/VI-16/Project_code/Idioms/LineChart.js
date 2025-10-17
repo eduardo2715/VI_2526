@@ -102,8 +102,12 @@ function updateLineChart(data, selector) {
     .transition().duration(500)
     .call(d3.axisBottom(lineX));
 
-  yAxis.transition().duration(500)
-    .call(d3.axisLeft(lineY).tickFormat(d => `$${d}`));
+  yAxis.transition().duration(100)
+    .call(d3.axisLeft(lineY).tickFormat(d => {
+      // Keep one decimal, avoid scientific notation for small numbers
+      if (d < 1) return `$${d}`;
+      if (d >= 1) return `$${d3.format(",.1f")(d)}`;
+    }));
 
   // --- Line generator ---
   lineGen = d3.line()
@@ -286,7 +290,11 @@ function setupLineZoom(data, groupsMerge, maxY) {
 
     lineY.domain([yMin, yMax]).nice();
     yAxis.transition().duration(100)
-      .call(d3.axisLeft(lineY).tickFormat(d => `$${d}`));
+    .call(d3.axisLeft(lineY).tickFormat(d => {
+      // Keep one decimal, avoid scientific notation for small numbers
+      if (d < 1) return `$${d}`;
+      if (d >= 1) return `$${d3.format(",.1f")(d)}`;
+    }));
 
     groupsMerge.select("path.slope-line").attr("d", d => lineGen(d.values));
     groupsMerge.selectAll("circle").attr("cy", d => lineY(d.avg));

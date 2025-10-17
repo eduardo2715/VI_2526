@@ -38,11 +38,9 @@ function initViolinPlot(selector) {
     .attr("transform", `translate(0,${violinInnerHeight})`);
   violinG.append("g").attr("class", "y-axis");
 
-  const rem4 = 3.9 * rem;
-
   violinG.append("text")
     .attr("x", violinInnerWidth / 2)
-    .attr("y", violinInnerHeight + rem4)
+    .attr("y", violinInnerHeight + 4 * rem)
     .attr("text-anchor", "middle")
     .attr("class", "axis-title")
     .text("Rarity");
@@ -50,7 +48,7 @@ function initViolinPlot(selector) {
   violinG.append("text")
     .attr("transform", "rotate(-90)")
     .attr("x", -violinInnerHeight / 2)
-    .attr("y", -violinMargin.left + 0.625 * rem)
+    .attr("y", -violinMargin.left)
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
     .attr("class", "axis-title")

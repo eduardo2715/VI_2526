@@ -5,8 +5,8 @@
 } */
 
 :root {
-  --chart-font-size: clamp(0.3rem, 0.6vw + 0.3rem, 2.6rem);
-  --chart-title-size: clamp(0.7rem, 2vw, 1.5rem);
+  --chart-font-size: clamp(0.3vw, 0.6vw + 0.3rem, 2.6vw);
+  --chart-title-size: clamp(0.7vw, 2vw, 1.5vw);
 }
 
 
@@ -195,7 +195,7 @@ html, body {
 
 .top-row {
   display: grid;
-  grid-template-columns: 3fr 1fr;
+  grid-template-columns: 2.5fr 1.5fr;
   gap: 0.75rem;
   min-height: 0;
 }
@@ -240,7 +240,7 @@ html, body {
 .ViolinPlot,
 .LineChart-container {
   position: relative;
-  padding: 0.5rem;
+  padding: 0.7rem;
   box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
@@ -253,7 +253,7 @@ html, body {
 
 /* --- BarChart Titles (axes & labels) --- */
 .BarChart .y-axis text { /* y-axis labels */
-  font-size: var(--chart-font-size);
+  font-size: calc(var(--chart-font-size) - 0.15rem);
   fill: #333;
 }
 
@@ -322,7 +322,7 @@ html, body {
 
 .LineChart .x-axis text,
 .LineChart .y-axis text {
-  font-size: var(--chart-font-size);
+  font-size: calc(var(--chart-font-size) - 0.15rem);
 }
 
 .LineChart .axis-title {
@@ -346,7 +346,7 @@ html, body {
 
 .ViolinPlot .x-axis text,
 .ViolinPlot .y-axis text {
-  font-size: calc(var(--chart-font-size) - 0.2rem);
+  font-size: calc(var(--chart-font-size) - 0.2vw);
 }
 
 
