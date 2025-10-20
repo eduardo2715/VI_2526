@@ -1,0 +1,14 @@
+[upbeat][smiling]Hey everyone! Welcome to our Information Visualization Project! We built this interactive dashboard to explore the huge and, honestly, kind of wild world of the Pokémon Trading Card Game market.
+[enthusiastic tone]Yeah! It focuses on four major sets — Base, Neo, EX, and Sword & Shield. Each one tells a different story in terms of price trends and popularity.
+[explaining clearly]On the left, we can filter everything by Year, Series, Set and Type. On the right, four connected visualizations instantly update, letting us dig into the market from multiple angles.
+[descriptive tone]Let’s start with the Scatterplot. Each dot is a card — Sales Volume on the X-axis and Revenue on the Y-axis. So, cards that made more money rise higher, and those that sold more shift to the right.
+[curious tone][pauses]Okay, let’s filter to the Base Set[clicking on filter][big pause]. There’s Charizard — way up near the top, massive revenue. But horizontally? It’s lower than the average in sales. [thoughtful] Makes sense — the price is high, so fewer people buy it.
+[observing tone]Exactly. And when we check the Bar Chart, which ranks the top 10 cards by sales volume, we see a clear pattern — Grass-type Pokémon appear more than any other type. They may not be the most expensive, but they’re consistently popular sellers.
+[transitioning tone]Okay, let’s switch things up a bit and filter to the Neo Set [clicking on filter]— maybe pick a specific Type, [thinking]Like...[big pause]Psychic[clicking on filter].
+So now the Violin Plot is showing Common, Uncommon and Rare Psychic cards from Neo. See how the Rares stretch much taller and wider? That means prices vary a lot — some are low, but a few jump really high.
+Meanwhile, Common and Uncommon are clustered near the bottom. Their prices don’t swing as wildly, which kind of fits — they’re steady, middle-ground cards collectors pick up often but don’t overpay for.
+[curious tone][slight pause]And while we’re here, try clicking on the Common violin. [curious tone] That highlights all the cards that belong to that group across the dashboard.
+[demonstrating tone]Yeah — now look over at the Line Chart. It shows how price changes by condition, from Mint to Damaged. Most of these cards drop in value at a similar rate. But there’s this one outlier that starts way higher and falls much more sharply — its steeper line shows it’s a pricier card to begin with.
+[reflective tone]It’s pretty cool seeing that relationship — the violin tells us the overall spread, and the line chart confirms how condition affects that same group of cards.
+[warm tone][smiling]So, together, all these visuals paint a full picture of the market — showing how Type drives popularity, Rarity shapes value, and Condition defines how price holds up.[light laugh][enthusiastic] it’s like watching the Pokémon economy in motion!
+[Pause]Thanks for checking out our Information Visualization Project!
