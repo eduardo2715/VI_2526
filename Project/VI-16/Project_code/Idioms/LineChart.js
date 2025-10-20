@@ -210,6 +210,7 @@ function handleLineMouseOver(event, d) {
       </div>
       <em>Serie:</em> ${d.serie}<br>
       <em>Set:</em> ${d.set}<br>
+      <em>Year:</em> ${d.releaseYear}<br>
       <em>Type:</em> ${d.type}<br>
       <em>Conditions:</em> ${d.values.map(v => v.condition).join(", ")}<br>
       <em>Prices:</em> ${d.values.map(v => "$" + v.avg.toFixed(2)).join(", ")}

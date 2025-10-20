@@ -41,7 +41,7 @@ function initViolinPlot(selector) {
   violinG.append("text")
     .attr("transform", "rotate(-90)")
     .attr("x", -violinInnerHeight / 2)
-    .attr("y", -violinMargin.left)
+    .attr("y", -violinMargin.left + 0.5 * rem)
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
     .attr("class", "axis-title")

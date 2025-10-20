@@ -5,7 +5,7 @@ const rem = 16; // 1rem = 16px
 // --- Global Variables ---
 
 const YEARS = [1999,2000,2001,2002,2003,2004,2005,2006,2007,2020,2021,2022,2023]; 
-const SERIES = ["Base","EX","Neo","Sword & Shield"];
+const SERIES = ["Base","Neo","EX","Sword & Shield"];
 const SETS = [
   "Base Set","Jungle","Fossil","Base Set 2","Team Rocket","Ruby & Sapphire",
   "Unseen Forces","Delta Species","Legend Maker","Holon Phantoms","Crystal Guardians",
@@ -462,6 +462,12 @@ async function init(){
           .style("opacity",0)
           .remove(); // safe to remove because no nested groups
         
+        d3.selectAll(".ScatterPlot .avg-group")
+          .transition().duration(500)
+          .style("opacity",0);
+
+        // Violin plot: hide x-axis labels
+        
         d3.select(".ViolinPlot").selectAll(".x-axis text")
           .style("pointer-events", "none");
 
@@ -514,6 +520,9 @@ async function init(){
 
       d3.select(".ViolinPlot").selectAll(".x-axis text")
           .style("pointer-events", "all");
+      
+      d3.selectAll(".ScatterPlot .avg-group")
+        .style("opacity",1);
 
     };
 

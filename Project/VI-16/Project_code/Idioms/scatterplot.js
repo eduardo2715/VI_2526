@@ -1,9 +1,4 @@
-// Scatterplot of Sales Volume vs Revenue
-// Each point is a card, colored by type
-// Hover to see details, click to select/deselect
-// Shared selection with other plots
-
-let scatterX, scatterY, scatterSvg, scatterG, scatterTooltip;
+let scatterX, scatterY, scatterSvg, scatterG, scatterTooltip, scatterAvgLine, scatterAvgLabel;
 let scatterInnerWidth, scatterInnerHeight, circleRadius;
 
 // Init once
@@ -53,6 +48,24 @@ function initScatterplot(selector) {
     .attr("class","axis-title")
     .text("Total Revenue ($)");
 
+  // Average vertical line + label (hidden initially)
+  const avgGroup = scatterG.append("g").attr("class","avg-group");
+  scatterAvgLine = avgGroup.append("line")
+    .attr("class","avg-line")
+    .attr("y1",0).attr("y2",scatterInnerHeight)
+    .attr("x1",0).attr("x2",0)
+    .style("stroke","#2c3e50")
+    .style("stroke-dasharray","4 3")
+    .style("stroke-width",1.5)
+    .style("opacity",0);
+
+  scatterAvgLabel = avgGroup.append("text")
+    .attr("class","avg-label")
+    .attr("y",-10)
+    .attr("text-anchor","middle")
+    .style("font-size","0.85rem")
+    .style("opacity",0);
+
   scatterTooltip = d3.select("body").select("#tooltip");
   if(scatterTooltip.empty()){
     scatterTooltip = d3.select("body").append("div").attr("id","tooltip");
@@ -71,6 +84,7 @@ function updateScatterplot(aggregated, selector){
     .range([scatterInnerHeight,0]);
 
   const formatRevenue = d3.format("$.2s");
+  const formatCount = d3.format(",.0f");
 
   scatterG.select(".x-axis")
     .transition().duration(500)
@@ -79,6 +93,23 @@ function updateScatterplot(aggregated, selector){
   scatterG.select(".y-axis")
     .transition().duration(500)
     .call(d3.axisLeft(scatterY).tickFormat(d=>formatRevenue(d)).ticks(Math.min(scatterInnerHeight/50,10)));
+
+  // Average line update
+  const avgCount = aggregated && aggregated.length ? d3.mean(aggregated, d => d.count) : 0;
+  const avgX = scatterX(avgCount);
+  if (aggregated && aggregated.length) {
+    scatterAvgLine.transition().duration(500)
+      .attr("x1",avgX).attr("x2",avgX)
+      .attr("y2",scatterInnerHeight)
+      .style("opacity",1);
+    scatterAvgLabel.transition().duration(500)
+      .attr("x",avgX)
+      .text(`Avg: ${formatCount(avgCount)}`)
+      .style("opacity",1);
+  } else {
+    scatterAvgLine.transition().duration(300).style("opacity",0);
+    scatterAvgLabel.transition().duration(300).style("opacity",0);
+  }
 
   const circles = scatterG.selectAll("circle")
     .data(aggregated, d=>d.name+d.serie+d.set);
