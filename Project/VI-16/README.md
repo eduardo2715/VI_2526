@@ -22,7 +22,7 @@
 
 ### Project Code & Demo
 
-- **Project Code:** [Project_Code](./Project_Code)  
+- **Project Code:** [Project_Code](./Project_code)  
 - **Video Demo:** [Project_demo.mp4](./Project_demo.mp4)
 
 <!-- Inline video (if the viewer supports HTML5 video) -->
