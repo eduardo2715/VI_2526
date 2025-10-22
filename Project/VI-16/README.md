@@ -22,8 +22,8 @@
 
 ### Project Code & Demo
 
-- **Project Code:** [VI-16/Project_Code](./VI-16/Project_Code)  
-- **Video Demo:** [VI-16/Project_demo.mp4](./VI-16/Project_demo.mp4)
+- **Project Code:** [Project_Code](./Project_Code)  
+- **Video Demo:** [Project_demo.mp4](./Project_demo.mp4)
 
 <!-- Inline video (if the viewer supports HTML5 video) -->
 <video controls width="640">
